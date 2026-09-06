@@ -1,0 +1,39 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir a versão do manifest
+        run: |
+          MANIFEST=$(python3 -c "import json;print(json.load(open('manifest.json'))['version'])")
+          echo "version=$MANIFEST" >> "$GITHUB_ENV"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "v$MANIFEST" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} não bate com a versão $MANIFEST do manifest.json" >&2
+            exit 1
+          fi
+
+      - name: Gerar o pacote
+        run: ./build.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-in-browser-${{ env.version }}
+          path: dist/*.zip
+
+      - name: Publicar release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true

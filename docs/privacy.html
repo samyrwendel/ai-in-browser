@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de Privacidade — AI in Browser</title>
+<link rel="icon" href="icon128.png">
+<style>
+  :root { color-scheme: light dark; --bg:#0b0d14; --fg:#e9ebf3; --mut:#a6abbd; --card:#12151f; --bd:rgba(255,255,255,.1); --ac:#8259F5; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f5f6fa; --fg:#141826; --mut:#4f566b; --card:#fff; --bd:rgba(20,24,40,.12); } }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:48px 20px 96px; background:var(--bg); color:var(--fg);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  main { max-width:760px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:14px; margin-bottom:32px; }
+  .brand img { width:52px; height:52px; border-radius:16px; }
+  .brand b { font-size:19px; }
+  .brand span { display:block; color:var(--mut); font-size:13px; }
+  h1 { font-size:30px; letter-spacing:-.02em; margin:0 0 8px; }
+  h2 { font-size:20px; letter-spacing:-.01em; margin:38px 0 10px; }
+  p, li { color:var(--fg); }
+  a { color:var(--ac); }
+  code { background:var(--card); border:1px solid var(--bd); border-radius:5px; padding:1px 5px; font-size:.9em; }
+  .tw { overflow-x:auto; border:1px solid var(--bd); border-radius:12px; margin:16px 0; }
+  table { border-collapse:collapse; width:100%; font-size:14.5px; }
+  th, td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--bd); vertical-align:top; }
+  th { background:var(--card); white-space:nowrap; }
+  tr:last-child td { border-bottom:0; }
+  footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--bd); color:var(--mut); font-size:13.5px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><img src="icon128.png" alt=""><div><b>AI in Browser</b><span>Extensão de código aberto para navegadores Chromium</span></div></div>
+<h1>Política de Privacidade — AI in Browser</h1>
+<p><strong>Última atualização:</strong> 6 de setembro de 2026</p>
+<p>O AI in Browser é uma extensão de código aberto que roda inteiramente no seu navegador. <strong>Não existe servidor do AI in Browser.</strong> Não coletamos, não armazenamos e não transmitimos dados para nós, porque não há um &quot;nós&quot; no meio da conversa: a extensão fala diretamente com o provedor de IA que <strong>você</strong> escolher.</p>
+<h2>O que fica salvo no seu navegador</h2>
+<p>Tudo é gravado apenas em <code>chrome.storage.local</code>, no seu perfil, e nunca sai dali por iniciativa da extensão:</p>
+<ul><li>Chaves de API que você cadastrar.</li><li>Endereços (URLs base) dos provedores configurados.</li><li>Histórico de conversas, incluindo mensagens, anexos e os passos do agente.</li><li>Preferências: tema, modelo escolhido, favoritos e ajustes do agente.</li></ul>
+<p>Você pode apagar tudo a qualquer momento em <strong>Configurações → Dados</strong>, ou removendo a extensão.</p>
+<h2>O que é enviado para fora</h2>
+<p>Somente para o provedor que você configurou e apenas quando você envia uma mensagem ou executa uma tarefa. Nesse envio vão:</p>
+<ul><li>Suas mensagens e o histórico da conversa atual.</li><li>Anexos que você adicionar (imagens e arquivos de texto).</li><li>O conteúdo da página quando você anexa a página, seleciona um trecho ou usa o modo Navegar (texto visível, lista de elementos interativos e, se o modelo tiver visão e a opção estiver ligada, capturas de tela da aba).</li></ul>
+<p>O destino é exclusivamente a URL base da conexão ativa, por exemplo <code>https://openrouter.ai/api/v1</code>, <code>https://api.openai.com/v1</code>, <code>https://api.anthropic.com/v1</code> ou <code>http://localhost:11434/v1</code>. Com um modelo local (Ollama, LM Studio), <strong>nada sai do seu computador</strong>.</p>
+<p>O tratamento dos dados depois disso é regido pela política do provedor escolhido. Consulte a política de quem você usar, por exemplo <a href="https://openrouter.ai/privacy">OpenRouter</a>, <a href="https://openai.com/policies/privacy-policy">OpenAI</a> ou <a href="https://www.anthropic.com/legal/privacy">Anthropic</a>.</p>
+<h2>O que a extensão nunca faz</h2>
+<ul><li>Não usa telemetria, analytics, rastreadores, cookies ou identificadores.</li><li>Não vende, aluga nem compartilha dados com terceiros.</li><li>Não envia dados para nenhum servidor dos autores da extensão.</li><li>Não lê páginas em segundo plano: só acessa a aba quando você pede (botão Página, menu de contexto ou uma tarefa no modo Navegar).</li><li>Não carrega código remoto. Todo o código executado está no pacote publicado.</li></ul>
+<h2>Permissões e por que existem</h2>
+<div class="tw"><table><thead><tr><th>Permissão</th><th>Para quê</th></tr></thead><tbody><tr><td><code>sidePanel</code></td><td>Mostrar o chat no painel lateral</td></tr><tr><td><code>storage</code>, <code>unlimitedStorage</code></td><td>Salvar preferências, chaves e conversas localmente</td></tr><tr><td><code>contextMenus</code></td><td>Itens &quot;Perguntar ao AI in Browser&quot; e &quot;Resumir esta página&quot;</td></tr><tr><td><code>activeTab</code>, <code>scripting</code></td><td>Ler o conteúdo da aba e executar as ações do agente, sempre a partir de uma ação sua</td></tr><tr><td><code>tabs</code></td><td>Ver título/URL da aba de trabalho e abrir, alternar ou fechar abas durante uma tarefa</td></tr><tr><td><code>clipboardWrite</code></td><td>Copiar respostas e trechos de código</td></tr><tr><td><code>host_permissions: &lt;all_urls&gt;</code></td><td>Falar com a API do provedor que você configurar (inclusive <code>localhost</code>) e atuar na aba que você indicar</td></tr><tr><td><code>debugger</code> <em>(opcional)</em></td><td>Cliques e teclas confiáveis, captura de página inteira, console, rede e código-fonte. Pedida só ao ligar o modo Navegar; pode ser recusada</td></tr><tr><td><code>history</code> <em>(opcional)</em></td><td>Ferramenta de busca no histórico. Desligada por padrão</td></tr><tr><td><code>downloads</code> <em>(opcional)</em></td><td>Ferramenta de download de arquivos. Desligada por padrão</td></tr></tbody></table></div>
+<h2>Modo Navegar (agente)</h2>
+<p>Quando ativado, o modelo recebe informações da aba de trabalho para executar a tarefa que você pediu. O agente é instruído a pedir confirmação antes de ações sensíveis (compras, pagamentos, envio de mensagens, exclusões, alteração de configurações de conta), a nunca digitar credenciais que você não tenha fornecido e a não resolver CAPTCHAs. Você pode interromper a qualquer momento, bloquear domínios em <strong>Configurações → Agente</strong> e desativar a execução de JavaScript na página.</p>
+<p>Ainda assim, um modelo de IA pode errar. Não use o modo Navegar em páginas com dados sensíveis sem acompanhar o que ele faz.</p>
+<h2>Crianças</h2>
+<p>A extensão não é direcionada a menores de 13 anos e não coleta dados de forma consciente de nenhuma faixa etária.</p>
+<h2>Alterações</h2>
+<p>Mudanças nesta política serão publicadas neste arquivo, no repositório do projeto, com a data de atualização revisada.</p>
+<h2>Contato</h2>
+<p>Abra uma issue no repositório do projeto: <a href="https://github.com/samyrwendel/ai-in-browser/issues">https://github.com/samyrwendel/ai-in-browser/issues</a></p>
+<footer>AI in Browser é software livre sob licença MIT. Nenhum dado é enviado aos autores da extensão.</footer>
+</main>
+</body>
+</html>

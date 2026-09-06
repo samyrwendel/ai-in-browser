@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="56 56 400 400" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">AI in Browser</title>
+  <desc id="desc">Ícone de uma janela de navegador com um núcleo luminoso de inteligência artificial.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="72" y1="52" x2="446" y2="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8259F5"/>
+      <stop offset="0.52" stop-color="#4F8EF7"/>
+      <stop offset="1" stop-color="#21D4E8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(274 291) rotate(90) scale(177)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="111" y1="126" x2="408" y2="401" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111522" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#090C15" stop-opacity="0.84"/>
+    </linearGradient>
+    <clipPath id="appClip">
+      <rect x="64" y="64" width="384" height="384" rx="104"/>
+    </clipPath>
+  </defs>
+
+  <rect x="64" y="72" width="384" height="384" rx="104" fill="#111A46" fill-opacity="0.20"/>
+  <rect x="64" y="64" width="384" height="384" rx="104" fill="url(#bg)"/>
+  <g clip-path="url(#appClip)">
+    <circle cx="272" cy="291" r="177" fill="url(#glow)"/>
+    <path d="M40 438C143 355 242 384 326 327C386 286 426 228 478 185V472H40V438Z" fill="#20CFE4" fill-opacity="0.12"/>
+    <path d="M52 117C154 161 255 116 343 75C382 57 422 42 469 42V92C375 117 328 185 216 181C150 179 99 155 52 139V117Z" fill="#FFFFFF" fill-opacity="0.10"/>
+  </g>
+
+  <rect x="104" y="114" width="304" height="284" rx="40" fill="url(#panel)" stroke="#FFFFFF" stroke-opacity="0.82" stroke-width="10"/>
+  <path d="M109 178H403" stroke="#FFFFFF" stroke-opacity="0.82" stroke-width="10"/>
+
+  <circle cx="139" cy="147" r="8" fill="#FFFFFF" fill-opacity="0.96"/>
+  <circle cx="167" cy="147" r="8" fill="#FFFFFF" fill-opacity="0.68"/>
+  <circle cx="195" cy="147" r="8" fill="#FFFFFF" fill-opacity="0.42"/>
+
+  <path d="M220 259L189 286L220 313" stroke="#FFFFFF" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M292 259L323 286L292 313" stroke="#FFFFFF" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M347 216C349.3 233.4 356.1 242.4 372 246.5C356.1 250.6 349.3 259.6 347 277C344.7 259.6 337.9 250.6 322 246.5C337.9 242.4 344.7 233.4 347 216Z" fill="#FFFFFF"/>
+  <circle cx="166" cy="347" r="8" fill="#FFFFFF"/>
+  <circle cx="191" cy="347" r="8" fill="#FFFFFF" fill-opacity="0.60"/>
+  <circle cx="216" cy="347" r="8" fill="#FFFFFF" fill-opacity="0.30"/>
+</svg>

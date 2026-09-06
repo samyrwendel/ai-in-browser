@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR" data-accent="violet">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI in Browser — Configurações</title>
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 4.2A10.5 10.5 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-3.2 4.3M6.6 6.6C3.8 8.6 2 12 2 12s3.5 8 10 8c1.6 0 3-.3 4.3-.9"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.7L19.5 9.5l-5.7 1.8L12 17l-1.8-5.7L4.5 9.5l5.7-1.8zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9zM5 14l.7 2 2 .7-2 .7L5 19.5l-.7-2-2-.7 2-.7z"/></symbol>
+  </svg>
+
+  <div class="page">
+    <aside class="nav">
+      <div class="nav-brand">
+        <img src="icons/icon48.png" alt="" class="nav-logo">
+        <div>
+          <div class="nav-title">AI in Browser</div>
+          <div class="nav-sub">Configurações · <span id="version">v1.0.0</span></div>
+        </div>
+      </div>
+      <nav>
+        <a href="#connections" class="nav-link active">Conexões</a>
+        <a href="#agent" class="nav-link">Agente (Navegar)</a>
+        <a href="#model" class="nav-link">Modelo e prompt</a>
+        <a href="#appearance" class="nav-link">Aparência</a>
+        <a href="#behavior" class="nav-link">Comportamento</a>
+        <a href="#data" class="nav-link">Dados</a>
+        <a href="#about" class="nav-link">Sobre</a>
+      </nav>
+      <div class="nav-foot">
+        <button id="open-chat" class="btn primary block"><svg><use href="#i-sparkle"/></svg> Abrir o chat</button>
+        <div id="save-state" class="save-state">Alterações salvas automaticamente</div>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <!-- ===== Conexões ===== -->
+      <section id="connections" class="section">
+        <div class="section-head">
+          <h2>Conexões</h2>
+          <p class="muted">Adicione a chave de um ou mais provedores. As chaves ficam salvas apenas neste navegador (chrome.storage.local) e são enviadas somente para a URL base do provedor.</p>
+        </div>
+        <div id="conn-list" class="conn-list"></div>
+        <div class="add-row">
+          <button id="add-conn" class="btn"><svg><use href="#i-plus"/></svg> Adicionar conexão personalizada</button>
+          <span class="tiny">Groq, DeepSeek, xAI, Mistral, Together, Gemini, vLLM, llama.cpp ou qualquer API compatível com OpenAI / Anthropic.</span>
+        </div>
+
+        <div id="add-form" class="card add-form hidden">
+          <div class="card-head"><b>Nova conexão</b></div>
+          <div class="grid2">
+            <label class="field">
+              <span>Preset</span>
+              <select id="add-preset" class="input"></select>
+            </label>
+            <label class="field">
+              <span>Nome</span>
+              <input id="add-name" class="input" placeholder="Ex.: Groq">
+            </label>
+            <label class="field">
+              <span>Formato da API</span>
+              <select id="add-type" class="input"></select>
+            </label>
+            <label class="field">
+              <span>URL base</span>
+              <input id="add-url" class="input" placeholder="https://api.exemplo.com/v1">
+            </label>
+            <label class="field span2">
+              <span>Chave de API (opcional para servidores locais)</span>
+              <input id="add-key" class="input" type="password" placeholder="sk-…" autocomplete="off">
+            </label>
+          </div>
+          <div class="row-end">
+            <button id="add-cancel" class="btn ghost">Cancelar</button>
+            <button id="add-save" class="btn primary">Adicionar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Agente ===== -->
+      <section id="agent" class="section">
+        <div class="section-head">
+          <h2>Agente (modo Navegar)</h2>
+          <p class="muted">Com o modo <b>Navegar</b> ligado no chat, o modelo pode ver a página, clicar, digitar, rolar, abrir abas, ler o código-fonte e tirar capturas de tela para concluir tarefas nas suas abas.</p>
+        </div>
+        <div class="card">
+          <div class="toggle-row">
+            <div><b>Usar DevTools Protocol (chrome.debugger)</b><div class="tiny">Cliques e teclas “confiáveis”, captura de página inteira, console, rede e execução de JS sem bloqueio de CSP. O Chrome mostra uma barra “AI in Browser começou a depurar este navegador” enquanto o agente trabalha.</div></div>
+            <label class="switch"><input id="agent-debugger" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><b>Permitir executar JavaScript na página</b><div class="tiny">Ferramenta <code>evaluate_js</code>: o agente roda código na aba para extrair dados ou interagir. Desligue para um modo mais restrito.</div></div>
+            <label class="switch"><input id="agent-js" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><b>Permitir histórico e downloads</b><div class="tiny">Libera as ferramentas <code>search_history</code> e <code>download</code>. Opcional: a extensão só pede essas permissões quando você liga aqui.</div></div>
+            <label class="switch"><input id="agent-extra" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><b>Enviar capturas de tela ao modelo</b><div class="tiny">Apenas para modelos com visão. Os elementos recebem etiquetas numeradas na imagem.</div></div>
+            <label class="switch"><input id="agent-screenshots" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span>Máximo de ações por tarefa <b id="steps-val">25</b></span>
+              <input id="agent-steps" type="range" min="5" max="100" step="5" value="25">
+              <em class="tiny">Ao atingir o limite, o agente para e resume o que fez.</em>
+            </label>
+            <label class="field">
+              <span>Sites bloqueados</span>
+              <textarea id="agent-blocked" class="textarea" rows="3" placeholder="um domínio por linha, ex.:&#10;banco.com.br&#10;paypal.com"></textarea>
+              <em class="tiny">O agente nunca clica, digita nem navega nesses domínios.</em>
+            </label>
+          </div>
+          <label class="field">
+            <span>Instruções extras para o agente</span>
+            <textarea id="agent-prompt" class="textarea" rows="3" placeholder="Ex.: Sempre use o site X para buscas. Nunca faça compras."></textarea>
+          </label>
+          <p class="tiny">Por padrão o agente pergunta antes de ações sensíveis (compras, envio de mensagens, exclusões, senhas) e nunca resolve CAPTCHAs. Você pode interromper a qualquer momento com <b>Parar</b> ou <span class="kbd">Esc</span>.</p>
+        </div>
+      </section>
+
+      <!-- ===== Modelo e prompt ===== -->
+      <section id="model" class="section">
+        <div class="section-head">
+          <h2>Modelo e prompt</h2>
+          <p class="muted">O modelo é escolhido no próprio chat (clique no nome do modelo ou <span class="kbd">Ctrl</span>+<span class="kbd">K</span>). Aqui você define o comportamento padrão.</p>
+        </div>
+        <div class="card">
+          <label class="field">
+            <span>Prompt de sistema</span>
+            <textarea id="system-prompt" class="textarea" rows="4" placeholder="Instruções gerais para o assistente…"></textarea>
+            <em class="tiny">Enviado no início de toda conversa. Deixe vazio para usar o padrão do modelo.</em>
+          </label>
+          <div class="grid2">
+            <label class="field">
+              <span>Temperatura <b id="temp-val">0.7</b></span>
+              <input id="temperature" type="range" min="0" max="2" step="0.05" value="0.7">
+              <em class="tiny">Baixa = mais precisa · Alta = mais criativa. Modelos de raciocínio da OpenAI ignoram este valor.</em>
+            </label>
+            <label class="field">
+              <span>Máximo de tokens na resposta</span>
+              <input id="max-tokens" class="input" type="number" min="0" step="256" placeholder="0 = automático">
+              <em class="tiny">0 deixa o provedor decidir (Anthropic usa 8192).</em>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div><b>Respostas em streaming</b><div class="tiny">Mostra o texto à medida que é gerado.</div></div>
+            <label class="switch"><input id="streaming" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><b>Mostrar raciocínio do modelo</b><div class="tiny">Exibe o bloco “Raciocínio” quando o modelo envia (DeepSeek R1, Claude com thinking, etc.).</div></div>
+            <label class="switch"><input id="show-reasoning" type="checkbox"><span class="track"></span></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Aparência ===== -->
+      <section id="appearance" class="section">
+        <div class="section-head"><h2>Aparência</h2></div>
+        <div class="card">
+          <div class="field">
+            <span>Tema</span>
+            <div class="segmented" id="theme-seg">
+              <button data-theme="system">Sistema</button>
+              <button data-theme="dark">Escuro</button>
+              <button data-theme="light">Claro</button>
+            </div>
+          </div>
+          <div class="field">
+            <span>Cor de destaque</span>
+            <div class="swatches" id="accent-swatches">
+              <button data-accent="violet" title="Violeta" style="--sw1:#8b5cf6;--sw2:#22d3ee"></button>
+              <button data-accent="blue" title="Azul" style="--sw1:#3b82f6;--sw2:#a78bfa"></button>
+              <button data-accent="emerald" title="Esmeralda" style="--sw1:#10b981;--sw2:#38bdf8"></button>
+              <button data-accent="rose" title="Rosa" style="--sw1:#f43f5e;--sw2:#fb923c"></button>
+              <button data-accent="amber" title="Âmbar" style="--sw1:#f59e0b;--sw2:#f43f5e"></button>
+              <button data-accent="mono" title="Mono" style="--sw1:#c7cad6;--sw2:#5b6178"></button>
+            </div>
+          </div>
+          <label class="field">
+            <span>Tamanho da fonte <b id="fs-val">14px</b></span>
+            <input id="font-size" type="range" min="12" max="18" step="1" value="14">
+          </label>
+        </div>
+      </section>
+
+      <!-- ===== Comportamento ===== -->
+      <section id="behavior" class="section">
+        <div class="section-head"><h2>Comportamento</h2></div>
+        <div class="card">
+          <div class="toggle-row">
+            <div><b>Enter envia a mensagem</b><div class="tiny">Desligado: use Ctrl/⌘ + Enter para enviar e Enter para nova linha.</div></div>
+            <label class="switch"><input id="send-on-enter" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><b>Anexar a página atual automaticamente</b><div class="tiny">Inclui o texto da aba ativa em toda mensagem (você pode remover pelo chip no chat).</div></div>
+            <label class="switch"><input id="page-default" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="grid2">
+            <label class="field">
+              <span>Limite de caracteres da página</span>
+              <input id="page-chars" class="input" type="number" min="2000" max="200000" step="1000">
+              <em class="tiny">≈ 4 caracteres por token. 16 000 ≈ 4k tokens.</em>
+            </label>
+            <div></div>
+            <label class="field">
+              <span>Seu nome</span>
+              <input id="user-name" class="input" placeholder="Você">
+            </label>
+            <label class="field">
+              <span>Nome do assistente</span>
+              <input id="assistant-name" class="input" placeholder="AI">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Dados ===== -->
+      <section id="data" class="section">
+        <div class="section-head"><h2>Dados</h2><p class="muted">Tudo fica no seu navegador. Nenhum dado passa por servidores do AI in Browser (não existem).</p></div>
+        <div class="card">
+          <div class="data-row">
+            <div><b>Conversas salvas</b><div class="tiny" id="chat-count">—</div></div>
+            <div class="row-end">
+              <button id="export-all" class="btn">Exportar backup (.json)</button>
+              <button id="import-all" class="btn">Importar</button>
+              <input id="import-file" type="file" accept="application/json" class="hidden">
+            </div>
+          </div>
+          <div class="data-row">
+            <div><b>Cache de modelos</b><div class="tiny">Listas de modelos ficam em cache por 6 horas.</div></div>
+            <button id="clear-cache" class="btn">Limpar cache</button>
+          </div>
+          <div class="data-row">
+            <div><b>Apagar todas as conversas</b><div class="tiny">Não pode ser desfeito.</div></div>
+            <button id="clear-chats" class="btn danger">Apagar conversas</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Sobre ===== -->
+      <section id="about" class="section">
+        <div class="section-head"><h2>Sobre</h2></div>
+        <div class="card about">
+          <p><b>AI in Browser</b> é uma extensão de código aberto para Chrome, Brave, Edge e outros navegadores Chromium que conecta você aos melhores modelos de IA via OpenRouter, OpenAI, Anthropic, Ollama, LM Studio ou qualquer API compatível.</p>
+          <div class="grid2">
+            <div>
+              <b>Atalhos</b>
+              <ul class="shortcuts">
+                <li><span class="kbd">⌘/Ctrl</span> + <span class="kbd">⇧</span> + <span class="kbd">Espaço</span> abrir o painel</li>
+                <li><span class="kbd">⌘/Ctrl</span> + <span class="kbd">K</span> trocar modelo</li>
+                <li><span class="kbd">⌘/Ctrl</span> + <span class="kbd">⇧</span> + <span class="kbd">O</span> nova conversa</li>
+                <li><span class="kbd">Esc</span> parar geração / fechar</li>
+              </ul>
+              <p class="tiny">Altere os atalhos em <a href="#" id="shortcuts-link">chrome://extensions/shortcuts</a>.</p>
+            </div>
+            <div>
+              <b>Dicas</b>
+              <ul class="shortcuts">
+                <li>Clique com o botão direito em um texto selecionado → “Perguntar ao AI in Browser”.</li>
+                <li>Botão direito no ícone da extensão → “Abrir em uma aba” para a versão ampla.</li>
+                <li>Modelos com sufixo <code>:free</code> no OpenRouter não consomem créditos.</li>
+                <li>Ollama e LM Studio funcionam sem chave e sem configurar CORS.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="tiny">Links úteis: <a href="https://openrouter.ai/models" target="_blank" rel="noopener">Modelos no OpenRouter ↗</a> · <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">Chaves OpenRouter ↗</a> · <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Chaves OpenAI ↗</a> · <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Chaves Anthropic ↗</a> · <a href="https://ollama.com" target="_blank" rel="noopener">Ollama ↗</a> · <a href="https://lmstudio.ai" target="_blank" rel="noopener">LM Studio ↗</a></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AI in Browser — captura da loja</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; width: 1280px; height: 800px; overflow: hidden; }
+  body {
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #e9ebf3;
+    background: #070911;
+    display: flex; align-items: center; gap: 56px; padding: 0 64px;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background:
+      radial-gradient(58% 46% at 6% -8%, rgba(130,89,245,.40), transparent 70%),
+      radial-gradient(50% 44% at 104% 108%, rgba(33,212,232,.26), transparent 70%),
+      radial-gradient(40% 34% at 88% -6%, rgba(79,142,247,.20), transparent 70%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; opacity: .5;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 46px 46px;
+    mask-image: radial-gradient(70% 70% at 30% 40%, #000, transparent 75%);
+  }
+  .copy { position: relative; z-index: 2; width: 560px; flex: none; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+  .brand img { width: 44px; height: 44px; border-radius: 13px; }
+  .brand b { font-size: 17px; letter-spacing: -.01em; }
+  .brand span { display: block; font-size: 12.5px; color: #9aa0b8; margin-top: 1px; }
+  h1 { font-size: 46px; line-height: 1.08; letter-spacing: -.032em; margin: 0 0 18px; font-weight: 700; }
+  h1 em { font-style: normal; background: linear-gradient(100deg, #a78bfa, #4F8EF7 55%, #21D4E8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { font-size: 18.5px; line-height: 1.5; color: #b6bccd; margin: 0 0 26px; }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  li { display: flex; align-items: flex-start; gap: 11px; font-size: 15.5px; color: #d3d7e4; }
+  li i { flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 7px; display: grid; place-items: center;
+    background: rgba(130,89,245,.2); border: 1px solid rgba(167,139,250,.42); color: #c4b5fd; font-style: normal; font-size: 12px; font-weight: 700; }
+  .stage { position: relative; z-index: 2; flex: 1; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .device {
+    border-radius: 20px; overflow: hidden; background: #0b0d14;
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 50px 110px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.04) inset, 0 0 90px rgba(130,89,245,.16);
+  }
+  .bar { height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 13px; background: #12141d; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f52; }
+  .bar i:first-child { background: #ff5f57; } .bar i:nth-child(2) { background: #febc2e; } .bar i:nth-child(3) { background: #28c840; }
+  .bar span { margin-left: 8px; font-size: 11.5px; color: #7b8199; }
+  iframe { display: block; border: 0; background: #0b0d14; }
+  body.wide { flex-direction: column; justify-content: center; gap: 24px; padding: 54px 64px 48px; }
+  body.wide .copy { width: 100%; text-align: center; }
+  body.wide .brand { justify-content: center; margin-bottom: 18px; }
+  body.wide h1 { font-size: 38px; margin-bottom: 10px; }
+  body.wide .sub { font-size: 17px; margin: 0; }
+  body.wide ul { display: none; }
+  body.wide .stage { height: auto; width: 100%; }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="brand"><img src="../../icons/icon128.png" alt=""><div><b>AI in Browser</b><span id="brand-sub">OpenRouter · OpenAI · Claude · Gemini · Ollama</span></div></div>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+    <ul id="bullets"></ul>
+  </div>
+  <div class="stage">
+    <div class="device" id="device">
+      <div class="bar"><i></i><i></i><i></i><span id="barlabel">AI in Browser</span></div>
+      <iframe id="frame" title="interface"></iframe>
+    </div>
+  </div>
+
+<script src="seeds.js"></script>
+<script>
+const q = new URLSearchParams(location.search);
+const S = window.SEEDS;
+
+const SHOTS = {
+  navegar: {
+    title: 'Peça. O agente <em>faz por você.</em>',
+    sub: 'O modo Navegar enxerga a página, clica, digita e navega até concluir a tarefa. Você acompanha cada passo.',
+    bullets: ['Clica, digita e preenche formulários', 'Lê texto, HTML e código-fonte da página', 'Pergunta antes de ações sensíveis'],
+    chats: [S.CHAT_AGENT], chat: 'c_demo_agent', model: ['openrouter', 'anthropic/claude-sonnet-5'], browse: true
+  },
+  modelos: {
+    title: 'Centenas de modelos, <em>uma extensão.</em>',
+    sub: 'Troque de modelo em dois cliques e veja preço e contexto antes de escolher. Uma chave do OpenRouter abre todos.',
+    bullets: ['Claude, GPT, Gemini, Grok, DeepSeek, Llama', 'Preço por milhão de tokens na lista', 'Favoritos, busca e filtro de gratuitos'],
+    chats: [S.CHAT_AGENT], chat: 'c_demo_agent', model: ['openrouter', 'anthropic/claude-sonnet-5'], browse: true, action: 'picker'
+  },
+  pagina: {
+    title: 'Converse com <em>a página aberta.</em>',
+    sub: 'Anexe a aba atual, selecione um trecho ou resuma pelo botão direito. A resposta chega em Markdown, com código destacado.',
+    bullets: ['Contexto da página em um clique', 'Anexe imagens e arquivos', 'Streaming, tabelas e blocos de código'],
+    chats: [S.CHAT_PAGE], chat: 'c_demo_page', model: ['openrouter', 'openai/gpt-5'], browse: false
+  },
+  local: {
+    title: 'Ou rode <em>100% offline.</em>',
+    sub: 'Ollama e LM Studio são detectados sozinhos. Sem chave, sem nuvem, sem nada saindo do seu computador.',
+    bullets: ['Detecção automática de servidores locais', 'Funciona sem internet', 'Nenhuma telemetria, nenhuma conta'],
+    chats: [S.CHAT_LOCAL], chat: 'c_demo_local', model: ['ollama', 'llama3.1:8b'], browse: false
+  },
+  config: {
+    title: 'Você no <em>controle.</em>',
+    sub: 'Permissões sensíveis são opcionais, o agente respeita sua lista de sites bloqueados e você limita quantas ações ele pode executar.',
+    wide: true, view: 'options', hash: '#agent',
+    chats: [S.CHAT_AGENT], chat: 'c_demo_agent', model: ['openrouter', 'anthropic/claude-sonnet-5'], browse: true
+  }
+};
+
+const cfg = SHOTS[q.get('s') || 'navegar'];
+document.getElementById('title').innerHTML = cfg.title;
+document.getElementById('sub').textContent = cfg.sub;
+document.getElementById('bullets').innerHTML = (cfg.bullets || []).map((b) => `<li><i>✓</i><span>${b}</span></li>`).join('');
+if (cfg.wide) document.body.classList.add('wide');
+
+// ---- semeia o armazenamento (mesma origem do app) ----
+const settings = {
+  version: 1,
+  connections: S.CONNECTIONS,
+  current: { connectionId: cfg.model[0], modelId: cfg.model[1] },
+  lastModelByConnection: { openrouter: 'anthropic/claude-sonnet-5', ollama: 'llama3.1:8b' },
+  favorites: ['openrouter:anthropic/claude-sonnet-5', 'openrouter:openai/gpt-5'],
+  systemPrompt: 'Você é um assistente útil, direto e preciso. Responda no idioma do usuário.',
+  temperature: 0.7, maxTokens: 0, streaming: true,
+  theme: 'dark', accent: 'violet', fontSize: 14,
+  sendOnEnter: true, pageContextDefault: false, pageContextChars: 16000,
+  showReasoning: true, userName: 'Você', assistantName: 'AI',
+  effort: 'auto', browseMode: !!cfg.browse,
+  agent: { maxSteps: 25, useDebugger: true, screenshots: true, confirmSensitive: true, allowJs: true, blockedDomains: ['banco.exemplo.com'], systemPrompt: '' }
+};
+localStorage.setItem('prism:settings', JSON.stringify(settings));
+localStorage.setItem('prism:seenSetup', 'true');
+localStorage.setItem('prism:chats', JSON.stringify(cfg.chats));
+localStorage.setItem('prism:modelCache', JSON.stringify({
+  openrouter: { ts: S.now, models: S.OR_MODELS },
+  ollama: { ts: S.now, models: S.OLLAMA_MODELS }
+}));
+
+const frame = document.getElementById('frame');
+const device = document.getElementById('device');
+if (cfg.view === 'options') {
+  frame.width = 1040; frame.height = 470;
+  document.getElementById('barlabel').textContent = 'Configurações — AI in Browser';
+  frame.src = '../../options.html' + (cfg.hash || '');
+} else {
+  frame.width = 452; frame.height = 716;
+  document.getElementById('barlabel').textContent = 'Painel lateral';
+  frame.src = '../../sidepanel.html';
+}
+
+frame.addEventListener('load', () => {
+  const d = frame.contentDocument;
+  const st = d.createElement('style');
+  st.textContent = '*{transition:none!important;animation:none!important;caret-color:transparent!important}::-webkit-scrollbar{width:0;height:0}';
+  d.head.appendChild(st);
+  setTimeout(() => {
+    try {
+      if (cfg.action === 'picker') d.getElementById('model-btn').click();
+      if (cfg.view === 'options') d.getElementById('agent').scrollIntoView();
+      const msgs = d.getElementById('messages');
+      if (msgs) msgs.scrollTop = 0;
+    } catch (e) {}
+    document.documentElement.dataset.ready = '1';
+  }, cfg.action ? 1400 : 900);
+});
+</script>
+</body>
+</html>

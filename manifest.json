@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "AI in Browser",
+  "short_name": "AI in Browser",
+  "version": "1.0.0",
+  "description": "Converse com IA sobre qualquer página e deixe o agente navegar, clicar e preencher por você. OpenRouter, OpenAI, Claude, Ollama.",
+  "homepage_url": "https://github.com/samyrwendel/ai-in-browser",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "AI in Browser — abrir chat",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "unlimitedStorage",
+    "contextMenus",
+    "scripting",
+    "activeTab",
+    "tabs",
+    "clipboardWrite"
+  ],
+  "optional_permissions": [
+    "debugger",
+    "history",
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Space",
+        "mac": "Command+Shift+Space"
+      },
+      "description": "Abrir o AI in Browser"
+    }
+  }
+}

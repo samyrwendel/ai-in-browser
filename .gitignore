@@ -1,0 +1,16 @@
+# build
+dist/
+*.zip
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# editores
+.vscode/
+.idea/
+*.swp
+
+# ferramentas locais
+node_modules/
+.claude/settings.local.json

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI in Browser — IA que enxerga a página e age por você</title>
+<meta name="description" content="Extensão de código aberto para navegadores Chromium: converse com a página aberta e deixe o agente navegar, clicar e preencher por você. OpenRouter, OpenAI, Claude, Gemini, Ollama.">
+<link rel="icon" href="icon128.png">
+<style>
+  :root { color-scheme: dark; --bg:#090b14; --fg:#eef0f8; --mut:#a8b0c8; --card:rgba(255,255,255,.05); --bd:rgba(255,255,255,.12); --ac:#8259F5; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; position:relative; overflow-x:hidden; }
+  body::before { content:""; position:absolute; inset:0 0 auto; height:900px; pointer-events:none;
+    background: radial-gradient(58% 50% at 12% -8%, rgba(130,89,245,.45), transparent 68%), radial-gradient(46% 44% at 100% 8%, rgba(33,212,232,.26), transparent 68%); }
+  main { position:relative; max-width:960px; margin:0 auto; padding:72px 22px 90px; }
+  .hero { display:flex; align-items:center; gap:22px; margin-bottom:28px; }
+  .hero img { width:76px; height:76px; border-radius:22px; }
+  h1 { font-size:44px; letter-spacing:-.03em; line-height:1.05; margin:0; }
+  .tag { color:var(--mut); font-size:19px; margin:14px 0 30px; max-width:640px; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:44px; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:12px; font-weight:600; font-size:15px; text-decoration:none;
+    background:linear-gradient(135deg,#8259F5,#21D4E8); color:#fff; }
+  .btn.ghost { background:var(--card); border:1px solid var(--bd); color:var(--fg); }
+  .shot { width:100%; border-radius:16px; border:1px solid var(--bd); display:block; margin:0 0 48px; }
+  h2 { font-size:24px; letter-spacing:-.02em; margin:44px 0 14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:18px; }
+  .card b { display:block; margin-bottom:5px; font-size:15.5px; }
+  .card span { color:var(--mut); font-size:14px; }
+  ul { color:var(--mut); }
+  a { color:#a78bfa; }
+  footer { margin-top:56px; padding-top:22px; border-top:1px solid var(--bd); color:var(--mut); font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <img src="icon128.png" alt="">
+    <div><h1>AI in Browser</h1></div>
+  </div>
+  <p class="tag">Converse com a página aberta e deixe o agente navegar, clicar e preencher por você — com OpenRouter, OpenAI, Claude, Gemini, Ollama ou qualquer API compatível.</p>
+  <div class="cta">
+    <a class="btn" href="https://github.com/samyrwendel/ai-in-browser">Ver no GitHub</a>
+    <a class="btn ghost" href="privacy.html">Política de privacidade</a>
+  </div>
+
+  <img class="shot" src="hero.png" alt="O modo Navegar executando uma tarefa no painel lateral">
+
+  <h2>O que ele faz</h2>
+  <div class="grid">
+    <div class="card"><b>Conversa com a página</b><span>Anexe a aba atual, selecione um trecho ou resuma pelo botão direito.</span></div>
+    <div class="card"><b>Modo Navegar</b><span>O agente clica, digita, rola, abre abas, lê o código-fonte e conclui a tarefa.</span></div>
+    <div class="card"><b>Centenas de modelos</b><span>Uma chave do OpenRouter, ou sua chave da OpenAI e da Anthropic.</span></div>
+    <div class="card"><b>100% local, se quiser</b><span>Ollama e LM Studio detectados sozinhos, sem nuvem e sem chave.</span></div>
+    <div class="card"><b>Você no controle</b><span>Permissões sensíveis opcionais, sites bloqueáveis e parada imediata.</span></div>
+    <div class="card"><b>Sem telemetria</b><span>Nada é enviado aos autores. Código aberto sob licença MIT.</span></div>
+  </div>
+
+  <h2>Privacidade</h2>
+  <p>Não existe servidor do AI in Browser. As chaves ficam em <code>chrome.storage.local</code> e as mensagens vão apenas para o provedor que você configurar. Detalhes na <a href="privacy.html">política de privacidade</a>.</p>
+
+  <footer>Código aberto sob licença MIT · <a href="https://github.com/samyrwendel/ai-in-browser">github.com/samyrwendel/ai-in-browser</a></footer>
+</main>
+</body>
+</html>

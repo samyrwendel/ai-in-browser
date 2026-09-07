@@ -1016,6 +1016,29 @@ async function runAgentTask(text, ctx, userMsg) {
     if (vr && vr.source !== 'main' && conn(vr.connectionId)) visionHelper = { conn: conn(vr.connectionId), modelId: vr.modelId, name: vr.name };
   }
   const msg = { id: uid(), role: 'assistant', agent: true, content: '', steps: [], ts: Date.now(), model: modelId, connectionId: c.id, pending: true, status: 'running', helpers };
+  // imagens anexadas pelo usuário: o agente trabalha com texto, então elas são
+  // descritas antes (pelo próprio modelo, se enxergar, ou pelo ajudante de visão)
+  let attachedNote = '';
+  if (userMsg?.images?.length) {
+    const own = P.modelSupportsVision(c, mInfo);
+    const describer = own ? { conn: c, modelId, name: displayName(mInfo) } : visionHelper;
+    if (!userMsg.imageDescriptions && describer) {
+      setAgentStatus(`Descrevendo ${userMsg.images.length === 1 ? 'a imagem anexada' : 'as imagens anexadas'} com ${describer.name}…`);
+      try {
+        userMsg.imageDescriptions = [await R.describeImages(describer.conn, describer.modelId, userMsg.images, { purpose: 'chat', question: text })];
+        if (!own) {
+          helpers.push({ role: 'vision', connectionId: describer.conn.id, modelId: describer.modelId, name: describer.name, source: 'auto' });
+        }
+        persist();
+      } catch (e) {
+        userMsg.imageDescriptions = [`(não foi possível descrever: ${P.networkErrorMessage(e, describer.conn) || e?.message || e})`];
+      }
+      setAgentStatus(null);
+    }
+    attachedNote = userMsg.imageDescriptions?.length
+      ? `\n\n[O usuário anexou ${userMsg.images.length} imagem(ns) à mensagem. Descrição feita por um modelo com visão:]\n${userMsg.imageDescriptions.join('\n\n')}\n\nResponda sobre ESSA imagem anexada. Só use a ferramenta screenshot se o usuário pedir algo sobre a página aberta no navegador.`
+      : `\n\n[O usuário anexou ${userMsg.images.length} imagem(ns), mas nenhum modelo com visão está ativo para descrevê-las. Diga isso a ele; não use screenshot como substituto.]`;
+  }
   state.chat.messages.push(msg);
   const node = appendMessage(msg);
   const perms = await PERM.granted();
@@ -1077,7 +1100,7 @@ async function runAgentTask(text, ctx, userMsg) {
   const context = ctx || (userMsg?.files?.length ? { kind: 'page', title: userMsg.files.map((f) => f.name).join(', '), url: '', text: userMsg.files.map((f) => `[${f.name}]\n${f.text}`).join('\n\n') } : null);
   let result;
   try {
-    result = await runner.run(text, { history, context });
+    result = await runner.run(text + attachedNote, { history, context });
   } catch (e) {
     result = { summary: '', success: false, error: e?.message || String(e), steps: msg.steps, usage: runner.usage, ms: 0 };
   }

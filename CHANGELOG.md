@@ -53,6 +53,11 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   presença de chave.
 
 ### Corrigido
+- No modo Navegar, imagens anexadas pelo usuário eram ignoradas: o agente
+  respondia sobre a aba aberta em vez do anexo. Agora o anexo é descrito antes
+  da tarefa (pelo próprio modelo, se enxergar, ou pelo ajudante de visão) e
+  entra no contexto, com instrução de não usar a captura de tela como
+  substituto.
 - Fixar um papel num roteador, num lote `:batch` ou num apelido `~…latest`
   deixava a cooperação sem efeito silenciosamente; agora essas fixações caem
   no automático e a tela explica o motivo.

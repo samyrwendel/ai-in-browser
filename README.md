@@ -47,6 +47,8 @@ Atalho: <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>⇧</kbd> + <kbd>Espaço</kbd> (al
 
 **Modelo local** — rode `ollama run llama3.1` (ou ative o servidor do LM Studio) e clique em **Detectar Ollama / LM Studio**.
 
+> O Ollama recusa requisições de navegador vindas de extensões e responde `403` até você liberar a origem. Na máquina onde ele roda, defina `OLLAMA_ORIGINS="chrome-extension://*"` e reinicie o serviço. Em macOS: `launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"`. Em Linux com systemd, adicione `Environment="OLLAMA_ORIGINS=chrome-extension://*"` à unidade. Para usar um Ollama de outra máquina, some a isso o `OLLAMA_HOST=0.0.0.0`.
+
 **OpenAI, Anthropic ou outro** — *Configurações → Conexões*. Há presets para Groq, DeepSeek, xAI, Mistral, Together, Gemini, vLLM, llama.cpp e Jan.
 
 ## Modo Navegar

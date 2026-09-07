@@ -19,7 +19,8 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   equilíbrio ou preço) e uma tabela comparativa dos modelos ativos com
   qualidade conhecida para a habilidade, preço por milhão de tokens e
   contexto, além da explicação do que o automático escolheria. Roteadores
-  como o Auto Router ficam fora das sugestões. As mensagens mostram quem
+  como o Auto Router, lotes (`:batch`) e apelidos (`~…-latest`) ficam fora
+  das sugestões, e cada tabela tem busca por nome, provedor ou id. As mensagens mostram quem
   cooperou, e um indicador na barra de composição mostra, antes de enviar,
   quantos ajudantes estão em jogo e quem cobre cada habilidade (automático,
   fixo, o principal cobre, desligado). O automático só preenche lacunas:

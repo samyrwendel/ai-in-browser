@@ -531,6 +531,13 @@ async function loadRoleModels(force = false) {
 }
 
 const rolesExpanded = new Set();
+const rolesQuery = {};
+
+function matchesQuery(c, q) {
+  if (!q) return true;
+  const hay = `${c.name} ${c.modelId} ${c.connectionName}`.toLowerCase();
+  return q.split(/\s+/).filter(Boolean).every((t) => hay.includes(t));
+}
 
 function tierDots(t) {
   const title = t >= 3 ? 'referência na habilidade' : t === 2 ? 'boa qualidade' : 'funciona, sem destaque';
@@ -559,17 +566,21 @@ function renderRoles() {
     const cands = R.candidates(role.id, settings, modelsByConn, main, cfg.prefer);
     const auto = R.explainAuto(role.id, settings, modelsByConn, main);
     const autoPick = R.resolveRole(role.id, { ...settings, roles: { ...(settings.roles || {}), [role.id]: { ...cfg, mode: 'auto' } } }, modelsByConn, main);
-    const expanded = rolesExpanded.has(role.id);
-    const shown = expanded ? cands : cands.slice(0, 6);
+    const q = (rolesQuery[role.id] || '').trim().toLowerCase();
+    const filtered = q ? cands.filter((c) => matchesQuery(c, q)) : cands;
+    const expanded = rolesExpanded.has(role.id) || !!q;
+    const shown = expanded ? filtered.slice(0, q ? 60 : filtered.length) : filtered.slice(0, 6);
     const pinnedKnown = cands.some((c) => c.connectionId === cfg.connectionId && c.modelId === cfg.modelId);
     const pinnedNote = cfg.mode === 'pinned' && cfg.modelId && !pinnedKnown ? `<div class="role-auto err">Fixado em <b>${esc(cfg.modelId)}</b> (${esc(cfg.connectionId)}), que não está na lista atual. Ative o provedor ou escolha outro abaixo.</div>` : '';
     const prefs = R.PREFERENCES.map((pr) => `<button data-prefer="${pr.id}" class="${cfg.prefer === pr.id ? 'active' : ''}" title="${esc(pr.hint)}">${esc(pr.label)}</button>`).join('');
+    const search = cands.length > 6 ? `<div class="cmp-search"><input type="search" data-search placeholder="Buscar por nome, provedor ou id… ex.: glm 5.3, openrouter, claude" value="${esc(rolesQuery[role.id] || '')}" autocomplete="off"><span class="tiny">${q ? `${filtered.length} de ${cands.length}` : `${cands.length} modelos`}</span></div>` : '';
     const table = cands.length
-      ? `<div class="cmp-wrap"><table class="cmp">
+      ? `${search}${filtered.length ? `<div class="cmp-wrap"><table class="cmp">
           <thead><tr><th>Modelo</th><th>Qualidade</th><th>Preço (1M entrada / saída)</th><th>Contexto</th><th></th></tr></thead>
           <tbody>${shown.map((c) => candidateRow(c, cfg, autoPick, role.id)).join('')}</tbody>
-        </table></div>
-        ${cands.length > 6 ? `<button type="button" class="cmp-more" data-more>${expanded ? 'Mostrar menos' : `Mostrar todos (${cands.length})`}</button>` : ''}`
+        </table></div>` : `<div class="role-auto">Nenhum modelo corresponde a "${esc(rolesQuery[role.id] || '')}".</div>`}
+        ${!q && cands.length > 6 ? `<button type="button" class="cmp-more" data-more>${expanded ? 'Mostrar menos' : `Mostrar todos (${cands.length})`}</button>` : ''}
+        ${q && filtered.length > 60 ? `<div class="tiny" style="padding:6px 2px">Mostrando 60 de ${filtered.length}; refine a busca.</div>` : ''}`
       : '<div class="role-auto err">Nenhum modelo ativo tem essa habilidade. Ative um provedor em Conexões.</div>';
     return `<div class="role ${cfg.mode}" data-role="${role.id}">
       <div class="role-head">
@@ -630,6 +641,23 @@ function bindRoles() {
     settings.roles[id] = cfg;
     save();
     renderRoles();
+  });
+  list.addEventListener('input', (e) => {
+    const inp = e.target.closest('[data-search]');
+    if (!inp) return;
+    const card = inp.closest('.role');
+    const id = card.dataset.role;
+    rolesQuery[id] = inp.value;
+    const pos = inp.selectionStart;
+    renderRoles();
+    const again = list.querySelector(`.role[data-role="${id}"] [data-search]`);
+    if (again) {
+      again.focus();
+      try {
+        again.setSelectionRange(pos, pos);
+      } catch {}
+      again.scrollIntoView({ block: 'nearest' });
+    }
   });
   $('#roles-reload').addEventListener('click', async () => {
     await loadRoleModels(true);

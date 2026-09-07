@@ -1,6 +1,9 @@
 // AI in Browser — service worker (Manifest V3)
 // Responsável por: comportamento do side panel, menus de contexto e atalhos.
 
+import { loadSettings } from './lib/storage.js';
+import { syncOriginRules } from './lib/netrules.js';
+
 const MENU_ASK_SELECTION = 'prism-ask-selection';
 const MENU_SUMMARIZE = 'prism-summarize-page';
 const MENU_OPEN_TAB = 'prism-open-tab';
@@ -44,9 +47,24 @@ function createMenus() {
   });
 }
 
+async function syncRules() {
+  try {
+    const s = await loadSettings();
+    return await syncOriginRules(s.connections);
+  } catch (e) {
+    console.warn('[netrules] falha ao sincronizar', e);
+    return { ok: false, reason: e?.message || String(e) };
+  }
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.settings) syncRules();
+});
+
 chrome.runtime.onInstalled.addListener(async (details) => {
   await enableSidePanelOnClick();
   createMenus();
+  syncRules();
   if (details.reason === 'install') {
     chrome.tabs.create({ url: tabUrl() });
   }
@@ -55,6 +73,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 chrome.runtime.onStartup.addListener(() => {
   enableSidePanelOnClick();
   createMenus();
+  syncRules();
 });
 
 function openPanel(tab) {
@@ -102,6 +121,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg?.type === 'open-options') {
     chrome.runtime.openOptionsPage();
     sendResponse({ ok: true });
+  } else if (msg?.type === 'sync-rules') {
+    syncRules().then(sendResponse);
+    return true;
   }
   return false;
 });

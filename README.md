@@ -47,7 +47,7 @@ Atalho: <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>⇧</kbd> + <kbd>Espaço</kbd> (al
 
 **Modelo local** — rode `ollama run llama3.1` (ou ative o servidor do LM Studio) e clique em **Detectar Ollama / LM Studio**.
 
-> O Ollama recusa requisições de navegador vindas de extensões e responde `403` até você liberar a origem. Na máquina onde ele roda, defina `OLLAMA_ORIGINS="chrome-extension://*"` e reinicie o serviço. Em macOS: `launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"`. Em Linux com systemd, adicione `Environment="OLLAMA_ORIGINS=chrome-extension://*"` à unidade. Para usar um Ollama de outra máquina, some a isso o `OLLAMA_HOST=0.0.0.0`.
+> Não é preciso configurar `OLLAMA_ORIGINS`: a extensão remove o cabeçalho `Origin` das próprias requisições para servidores locais e personalizados (via `declarativeNetRequest`), então o Ollama as aceita como aceita o `curl`. Para usar um Ollama de outra máquina, inicie-o com `OLLAMA_HOST=0.0.0.0`. Se mesmo assim aparecer `403`, o plano B é `OLLAMA_ORIGINS="chrome-extension://*"` na máquina do Ollama.
 
 **OpenAI, Anthropic ou outro** — *Configurações → Conexões*. Há presets para Groq, DeepSeek, xAI, Mistral, Together, Gemini, vLLM, llama.cpp e Jan.
 
@@ -93,7 +93,7 @@ lib/storage.js     armazenamento
 
 ## Permissões
 
-**Obrigatórias:** `sidePanel`, `storage`, `unlimitedStorage`, `contextMenus`, `scripting`, `activeTab`, `tabs`, `clipboardWrite` e `host_permissions: <all_urls>`.
+**Obrigatórias:** `sidePanel`, `storage`, `unlimitedStorage`, `contextMenus`, `scripting`, `activeTab`, `tabs`, `clipboardWrite`, `declarativeNetRequestWithHostAccess` e `host_permissions: <all_urls>`.
 
 **Opcionais** (a extensão instala sem elas e só as pede quando o recurso é usado):
 
@@ -106,6 +106,8 @@ lib/storage.js     armazenamento
 O `debugger` é o que dá cliques e teclas confiáveis, captura de página inteira, console, rede, código-fonte e execução de JavaScript sem bloqueio de CSP — o mesmo mecanismo usado por Playwright e Puppeteer. Enquanto o agente trabalha, o Chrome mostra a barra "AI in Browser começou a depurar este navegador"; ela some ao terminar.
 
 `<all_urls>` permite chamar qualquer URL base configurada (inclusive `localhost`) e ler ou agir na aba que você indicar. Nada é lido sem uma ação sua.
+
+`declarativeNetRequestWithHostAccess` serve para uma única regra: remover o cabeçalho `Origin` das requisições que a própria extensão faz às URLs base locais ou personalizadas que você configurou, para que Ollama e similares as aceitem sem configuração extra. A regra é restrita ao iniciador da extensão e não toca requisições de sites.
 
 ## Navegadores
 

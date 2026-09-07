@@ -61,6 +61,7 @@ escolhido. Consulte a política de quem você usar, por exemplo
 | `activeTab`, `scripting` | Ler o conteúdo da aba e executar as ações do agente, sempre a partir de uma ação sua |
 | `tabs` | Ver título/URL da aba de trabalho e abrir, alternar ou fechar abas durante uma tarefa |
 | `clipboardWrite` | Copiar respostas e trechos de código |
+| `declarativeNetRequestWithHostAccess` | Remover o cabeçalho `Origin` apenas das requisições da própria extensão para os servidores de modelos locais ou personalizados que você configurou, para que aceitem a conexão sem configuração extra. Não altera requisições de sites |
 | `host_permissions: <all_urls>` | Falar com a API do provedor que você configurar (inclusive `localhost`) e atuar na aba que você indicar |
 | `debugger` *(opcional)* | Cliques e teclas confiáveis, captura de página inteira, console, rede e código-fonte. Pedida só ao ligar o modo Navegar; pode ser recusada |
 | `history` *(opcional)* | Ferramenta de busca no histórico. Desligada por padrão |

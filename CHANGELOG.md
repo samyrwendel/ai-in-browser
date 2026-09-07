@@ -4,6 +4,21 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.1] — 2026-09-07
+
+### Corrigido
+- Ollama e servidores compatíveis com OpenAI passam a funcionar sem configurar
+  `OLLAMA_ORIGINS`: a extensão remove o cabeçalho `Origin` das próprias
+  requisições para as URLs base locais ou personalizadas (nova permissão
+  `declarativeNetRequestWithHostAccess`, restrita ao iniciador da extensão).
+- O botão "Testar conexão" agora faz uma sonda `POST` com a mesma forma do
+  chat; antes aprovava a listagem de modelos e o chat falhava com 403.
+- O erro 403 sem chave de API explica que a origem foi recusada, em vez de
+  acusar chave inválida.
+- A resposta do usuário a uma pergunta do agente aparece dentro do bloco da
+  pergunta, preservando a ordem da conversa.
+- Ícone 128×128 da loja com margem, conforme as diretrizes.
+
 ## [1.0.0] — 2026-09-06
 
 Primeira versão pública, preparada para a Chrome Web Store.

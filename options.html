@@ -274,7 +274,7 @@
                 <li>Clique com o botão direito em um texto selecionado → “Perguntar ao AI in Browser”.</li>
                 <li>Botão direito no ícone da extensão → “Abrir em uma aba” para a versão ampla.</li>
                 <li>Modelos com sufixo <code>:free</code> no OpenRouter não consomem créditos.</li>
-                <li>Ollama e LM Studio não pedem chave, mas o Ollama só aceita extensões se você definir <code>OLLAMA_ORIGINS="chrome-extension://*"</code> e reiniciar o serviço.</li>
+                <li>Ollama e LM Studio funcionam sem chave e sem configurar o servidor: a extensão ajusta o cabeçalho de origem nas próprias requisições. Só se ainda der 403, defina <code>OLLAMA_ORIGINS="chrome-extension://*"</code>.</li>
               </ul>
             </div>
           </div>

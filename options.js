@@ -143,6 +143,11 @@ function bindConnections() {
       st.textContent = 'Testando…';
       test.disabled = true;
       await save({ immediate: true });
+      if (S.HAS_CHROME && chrome.runtime?.sendMessage) {
+        try {
+          await chrome.runtime.sendMessage({ type: 'sync-rules' });
+        } catch {}
+      }
       const r = await P.testConnection(c);
       test.disabled = false;
       st.className = 'status ' + (r.ok ? 'ok' : 'err');

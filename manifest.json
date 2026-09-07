@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI in Browser",
   "short_name": "AI in Browser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converse com IA sobre qualquer página e deixe o agente navegar, clicar e preencher por você. OpenRouter, OpenAI, Claude, Ollama.",
   "homepage_url": "https://github.com/samyrwendel/ai-in-browser",
   "minimum_chrome_version": "116",
@@ -40,7 +40,8 @@
     "scripting",
     "activeTab",
     "tabs",
-    "clipboardWrite"
+    "clipboardWrite",
+    "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [
     "debugger",

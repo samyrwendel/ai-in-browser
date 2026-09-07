@@ -460,10 +460,12 @@ function agentRunHtml(msg) {
         : st.hadImage
           ? '<div class="tiny">📸 captura de tela (não salva no histórico)</div>'
           : '';
+      const helperTag = st.helper ? `<span class="astep-helper" title="descrito por um modelo com visão">👁️ ${esc(st.helper.name)}</span>` : '';
+      const noteTag = st.note === 'sem visão' ? '<span class="astep-note" title="nenhum modelo com visão ativo">sem visão</span>' : st.note === 'falha na visão' ? '<span class="astep-note err">falha na visão</span>' : '';
       return `<div class="astep ${esc(st.status || 'ok')}" data-sid="${esc(st.id)}">
         <span class="astep-ico">${st.icon || '🔧'}</span>
         <div class="astep-body">
-          <div class="astep-title">${esc(st.label || st.name)}</div>
+          <div class="astep-title">${esc(st.label || st.name)}${helperTag}${noteTag}</div>
           ${st.thought ? `<div class="astep-thought">${esc(st.thought.slice(0, 240))}</div>` : ''}
           ${st.result ? `<details class="astep-details"${open}><summary>Resultado</summary><pre>${esc(st.result.slice(0, 6000))}${st.result.length > 6000 ? '\n[…]' : ''}</pre></details>` : ''}
           ${img}

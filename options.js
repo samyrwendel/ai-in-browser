@@ -560,7 +560,12 @@ function renderRoles() {
     const expanded = rolesExpanded.has(role.id) || !!q;
     const shown = expanded ? filtered.slice(0, q ? 60 : filtered.length) : filtered.slice(0, 6);
     const pinnedKnown = cands.some((c) => c.connectionId === cfg.connectionId && c.modelId === cfg.modelId);
-    const pinnedNote = cfg.mode === 'pinned' && cfg.modelId && !pinnedKnown ? `<div class="role-auto err">Fixado em <b>${esc(cfg.modelId)}</b> (${esc(cfg.connectionId)}), que não está na lista atual. Ative o provedor ou escolha outro abaixo.</div>` : '';
+    const problem = R.pinnedProblem(cfg, settings);
+    const pinnedNote = problem
+      ? `<div class="role-auto err">Fixado em <b>${esc(cfg.modelId)}</b>, mas ${esc(problem)}. A extensão está usando o <b>automático</b> nesta habilidade; escolha outro modelo abaixo.</div>`
+      : cfg.mode === 'pinned' && cfg.modelId && !pinnedKnown
+        ? `<div class="role-auto err">Fixado em <b>${esc(cfg.modelId)}</b>, que não aparece na lista atual (talvez o modelo tenha saído do catálogo). Escolha outro abaixo.</div>`
+        : '';
     const prefs = R.PREFERENCES.map((pr) => `<button data-prefer="${pr.id}" class="${cfg.prefer === pr.id ? 'active' : ''}" title="${esc(pr.hint)}">${esc(pr.label)}</button>`).join('');
     const search = cands.length > 6 ? `<div class="cmp-search"><input type="search" data-search placeholder="Buscar por nome, provedor ou id… ex.: glm 5.3, openrouter, claude" value="${esc(rolesQuery[role.id] || '')}" autocomplete="off"><span class="tiny">${q ? `${filtered.length} de ${cands.length}` : `${cands.length} modelos`}</span></div>` : '';
     const table = cands.length

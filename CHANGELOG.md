@@ -53,6 +53,14 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   presença de chave.
 
 ### Corrigido
+- Fixar um papel num roteador, num lote `:batch` ou num apelido `~…latest`
+  deixava a cooperação sem efeito silenciosamente; agora essas fixações caem
+  no automático e a tela explica o motivo.
+- Cada passo do agente mostra quem descreveu a captura (`👁️ modelo`) ou avisa
+  `sem visão` quando nenhum modelo com visão está ativo, em vez de deixar o
+  usuário sem saber se houve cooperação.
+- Modelos de visão com `v` no nome (GLM 4.6V, GLM 5V Turbo, Qwen VL) passam a
+  ser reconhecidos como capazes de visão.
 - Ollama e servidores compatíveis com OpenAI passam a funcionar sem configurar
   `OLLAMA_ORIGINS`: a extensão remove o cabeçalho `Origin` das próprias
   requisições para as URLs base locais ou personalizadas (nova permissão

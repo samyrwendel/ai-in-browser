@@ -733,3 +733,7 @@
 .box-grip { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); width: 56px; height: 12px; cursor: ns-resize; z-index: 2; touch-action: none; }
 .box-grip::before { content: ""; display: block; margin: 4px auto 0; width: 34px; height: 4px; border-radius: 4px; background: var(--border-2); opacity: .7; transition: background .15s, opacity .15s; }
 .box:hover .box-grip::before, .box-grip:active::before { background: rgba(var(--accent-rgb), .8); opacity: 1; }
+
+.astep-helper { display: inline-flex; align-items: center; gap: 3px; margin-left: 7px; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: rgba(var(--accent-2-rgb), .14); color: var(--accent-2); border: 1px solid rgba(var(--accent-2-rgb), .35); }
+.astep-note { margin-left: 7px; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); }
+.astep-note.err { color: var(--danger); border-color: rgba(var(--danger-rgb), .35); }

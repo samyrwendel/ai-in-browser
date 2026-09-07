@@ -695,3 +695,30 @@
 .model-btn .model-sub { font-size: 10.5px; }
 .msg-model { font-size: 10.5px; }
 .helper-chip { font-size: 10px; }
+
+/* ===== composição no estilo Claude Code: caixa só com o texto, controles abaixo ===== */
+.composer-wrap { position: relative; padding: 4px 12px 8px; }
+.composer { border: 0; background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
+.composer:focus-within { border-color: transparent; box-shadow: none; }
+.composer textarea {
+  display: block; width: 100%;
+  min-height: 74px; padding: 12px 14px 14px;
+  border: 1px solid var(--border-2); border-radius: 16px;
+  background: var(--bg-2);
+  box-shadow: 0 8px 30px rgba(0,0,0,.28);
+  transition: border-color .15s, box-shadow .15s;
+}
+[data-theme="light"] .composer textarea { box-shadow: 0 8px 30px rgba(20,24,40,.10); }
+.composer textarea:focus { border-color: rgba(var(--accent-rgb), .6); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .16), 0 8px 30px rgba(0,0,0,.28); }
+.composer.drag textarea { border-color: var(--accent); background: rgba(var(--accent-rgb), .06); }
+.browse .composer { border-color: transparent; }
+.browse .composer textarea { border-color: rgba(var(--accent-rgb), .45); }
+.composer .composer-actions { margin: 6px 2px 0; row-gap: 4px; }
+.composer .composer-left { flex: 1 1 auto; }
+.composer .composer-right { flex: 0 1 auto; margin-left: auto; }
+.composer .model-mini { flex: 0 1 auto; max-width: 200px; margin-right: 0; }
+.composer .send-btn { width: 30px; height: 30px; }
+/* menus flutuam acima do bloco de composição */
+.effort-menu, .coop-menu { top: auto; bottom: 100%; margin-bottom: 6px; }
+.coop-menu { left: 12px; }
+.effort-menu { right: 12px; left: auto; }

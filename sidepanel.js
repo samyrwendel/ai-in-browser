@@ -1710,14 +1710,14 @@ async function handleStorageChange(changes, area) {
 function autoResize() {
   const ta = els.input;
   const manual = Number(state.settings?.composerHeight) || 0;
-  if (manual >= 66) {
+  if (manual >= 74) {
     ta.style.height = Math.min(manual, Math.round(window.innerHeight * 0.7)) + 'px';
     state.autoHeight = ta.offsetHeight;
     return;
   }
   ta.style.height = 'auto';
   const max = Math.max(160, Math.round(window.innerHeight * 0.45));
-  ta.style.height = Math.max(66, Math.min(ta.scrollHeight, max)) + 'px';
+  ta.style.height = Math.max(74, Math.min(ta.scrollHeight, max)) + 'px';
   state.autoHeight = ta.offsetHeight;
 }
 window.addEventListener('resize', () => autoResize());
@@ -1727,7 +1727,7 @@ async function rememberManualHeight() {
   const h = ta.offsetHeight;
   if (!h || h === state.autoHeight) return; // não foi um arraste
   // arrastar até o mínimo devolve o modo automático
-  state.settings.composerHeight = h <= 70 ? 0 : h;
+  state.settings.composerHeight = h <= 78 ? 0 : h;
   state.autoHeight = h;
   await saveSettings();
 }
@@ -1938,7 +1938,7 @@ function bindEvents() {
     if (!S.HAS_CHROME) return els.fileInput.click();
     const m = document.createElement('div');
     m.className = 'menu attach-menu';
-    m.style.cssText = 'top:auto;bottom:74px;left:12px;right:auto;';
+    m.style.cssText = 'top:auto;bottom:100%;margin-bottom:6px;left:12px;right:auto;';
     m.innerHTML = `<button data-a="file"><svg><use href="#i-paperclip"/></svg> Anexar imagem ou arquivo</button><button data-a="shot"><svg><use href="#i-image"/></svg> Capturar a aba atual</button>`;
     m.addEventListener('click', (ev) => {
       const b = ev.target.closest('[data-a]');
@@ -1948,7 +1948,7 @@ function bindEvents() {
       else attachTabCapture();
     });
     document.querySelectorAll('.attach-menu').forEach((x) => x.remove());
-    els.app.appendChild(m);
+    document.querySelector('.composer-wrap').appendChild(m);
     const close = (ev) => {
       if (!ev.target.closest('.attach-menu')) {
         m.remove();

@@ -93,6 +93,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   transition: border-color .2s;
 }
 .conn.ok { border-color: rgba(52,211,153,.35); }
+.conn.err { border-color: rgba(var(--danger-rgb), .35); }
 .conn-head { display: flex; align-items: center; gap: 12px; }
 .conn-head .badge { width: 32px; height: 32px; border-radius: 10px; font-size: 11px; }
 .conn-title { flex: 1; min-width: 0; }

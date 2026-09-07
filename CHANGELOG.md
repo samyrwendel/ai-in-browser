@@ -6,6 +6,16 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [1.0.1] — 2026-09-07
 
+### Alterado
+- Provedores começam **desativados** e passam a ativos quando você cola uma
+  chave, quando o teste de conexão passa ou quando um servidor local é
+  detectado no primeiro uso. Só os ativos aparecem no seletor e são sondados.
+  Configurações antigas são migradas: provedores sem chave e fora de uso são
+  desativados.
+- A borda e o selo de cada provedor refletem o último teste real
+  ("conectada", "falhou no teste", "não testada"), não mais a simples
+  presença de chave.
+
 ### Corrigido
 - Ollama e servidores compatíveis com OpenAI passam a funcionar sem configurar
   `OLLAMA_ORIGINS`: a extensão remove o cabeçalho `Origin` das próprias

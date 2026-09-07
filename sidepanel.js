@@ -57,7 +57,7 @@ function isConfigured(c) {
   return !!c.apiKey || !c.builtin;
 }
 function visibleConnections() {
-  return state.settings.connections.filter((c) => c.enabled !== false && (c.local || c.apiKey || c.type === 'openrouter' || !c.builtin));
+  return state.settings.connections.filter((c) => c.enabled === true);
 }
 function modelInfo(connId, modelId) {
   if (!modelId) return null;
@@ -189,9 +189,21 @@ async function ensureModels(connId, { force = false } = {}) {
 }
 
 async function detectLocal({ force = false } = {}) {
-  const locals = state.settings.connections.filter((c) => c.local && c.enabled !== false);
+  // Sonda os locais ativos; no primeiro uso (nada ativo) ou quando forçado, sonda todos
+  // e ativa os que responderem. É a "detecção automática".
+  const anyEnabled = state.settings.connections.some((c) => c.enabled === true);
+  const locals = state.settings.connections.filter((c) => c.local && (force || c.enabled === true || !anyEnabled));
   await Promise.all(locals.map((c) => ensureModels(c.id, { force })));
-  return locals.filter((c) => state.localDetected[c.id]);
+  const found = locals.filter((c) => state.localDetected[c.id]);
+  let changed = false;
+  for (const c of found) {
+    if (c.enabled !== true) {
+      c.enabled = true;
+      changed = true;
+    }
+  }
+  if (changed) await saveSettings();
+  return found;
 }
 
 function defaultModelFor(connId) {
@@ -217,15 +229,15 @@ function defaultModelFor(connId) {
 
 async function bootstrapModels() {
   let cur = currentConn();
-  if (!isConfigured(cur) && !(cur?.type === 'openrouter')) {
+  if (!isConfigured(cur)) {
     const alt = state.settings.connections.find((c) => isConfigured(c));
     if (alt) {
       state.settings.current = { connectionId: alt.id, modelId: state.settings.lastModelByConnection?.[alt.id] || '' };
       cur = alt;
     }
   }
-  if (!cur) return;
   updateHeader();
+  if (!cur || !isConfigured(cur)) return; // nada configurado: a tela inicial cuida disso
   const list = await ensureModels(cur.id);
   const mid = state.settings.current.modelId;
   if (!mid || (list.length && !list.find((m) => m.id === mid) && cur.type !== 'openrouter' && !cur.local)) {
@@ -1282,17 +1294,22 @@ async function setupOpenRouter() {
   }
   const c = conn('openrouter');
   c.apiKey = key;
+  c.enabled = true;
   await saveSettings();
   st.className = 'tiny status';
   st.textContent = 'Verificando…';
   els.setupOrSave.disabled = true;
   const r = await P.testConnection(c);
   els.setupOrSave.disabled = false;
+  c.lastTest = { ok: r.ok, message: r.message, ts: Date.now() };
   if (!r.ok) {
+    c.enabled = false;
+    await saveSettings();
     st.className = 'tiny status err';
     st.textContent = r.message;
     return;
   }
+  await saveSettings();
   state.models.openrouter = r.models;
   state.modelStatus.openrouter = 'ok';
   await S.setModelCache('openrouter', r.models);

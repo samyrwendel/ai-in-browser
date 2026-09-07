@@ -55,11 +55,25 @@ function save({ immediate = false } = {}) {
 // ---------- conexões ----------
 
 function statusPill(c) {
-  if (c.enabled === false) return '<span class="pill">desativada</span>';
-  if (c.local) return '<span class="pill">local · sem chave</span>';
-  if (c.apiKey) return '<span class="pill ok"><svg width="11" height="11"><use href="#i-check"/></svg> chave salva</span>';
-  if (!c.builtin) return '<span class="pill warn">sem chave</span>';
+  if (c.enabled !== true) return '<span class="pill">desativada</span>';
+  if (c.lastTest?.ok) return '<span class="pill ok"><svg width="11" height="11"><use href="#i-check"/></svg> conectada</span>';
+  if (c.lastTest && !c.lastTest.ok) return '<span class="pill err">falhou no teste</span>';
+  if (c.apiKey) return '<span class="pill">chave salva · não testada</span>';
+  if (c.local) return '<span class="pill">local · não testada</span>';
   return '<span class="pill warn">sem chave</span>';
+}
+
+function cardState(c) {
+  if (c.enabled !== true) return '';
+  if (c.lastTest?.ok) return ' ok';
+  if (c.lastTest && !c.lastTest.ok) return ' err';
+  return '';
+}
+
+function lastTestText(c) {
+  if (!c.lastTest) return '';
+  const quando = new Date(c.lastTest.ts).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return `${c.lastTest.ok ? '✓' : '✗'} ${c.lastTest.message} · ${quando}`;
 }
 
 function keyLink(c) {
@@ -79,12 +93,12 @@ function renderConnections() {
     .map((c) => {
       const b = P.connectionBadge(c);
       const typeLabel = c.type === 'openrouter' ? 'OpenRouter' : c.type === 'anthropic' ? 'API Anthropic' : 'API compatível com OpenAI';
-      return `<div class="conn${c.apiKey || c.local ? ' ok' : ''}" data-id="${esc(c.id)}">
+      return `<div class="conn${cardState(c)}" data-id="${esc(c.id)}">
         <div class="conn-head">
           <span class="badge" style="background:${b.color};color:${/^#(f|e)/i.test(b.color) ? '#111' : '#fff'}">${b.letter}</span>
           <div class="conn-title"><b>${esc(c.name)}</b><span class="tiny">${esc(typeLabel)} · ${esc(c.hint || c.baseUrl)}</span></div>
           ${statusPill(c)}
-          <label class="switch" title="Ativar/desativar"><input type="checkbox" data-field="enabled" ${c.enabled !== false ? 'checked' : ''}><span class="track"></span></label>
+          <label class="switch" title="Ativar/desativar"><input type="checkbox" data-field="enabled" ${c.enabled === true ? 'checked' : ''}><span class="track"></span></label>
         </div>
         <div class="conn-body">
           <label class="field">
@@ -103,7 +117,7 @@ function renderConnections() {
         <div class="conn-foot">
           <button class="btn sm" data-test>Testar conexão</button>
           ${c.builtin ? '' : '<button class="btn sm danger" data-remove><svg><use href="#i-trash"/></svg> Remover</button>'}
-          <span class="status"></span>
+          <span class="status${c.lastTest ? (c.lastTest.ok ? ' ok' : ' err') : ''}">${esc(lastTestText(c))}</span>
         </div>
       </div>`;
     })
@@ -119,10 +133,23 @@ function bindConnections() {
     const c = settings.connections.find((x) => x.id === card.dataset.id);
     if (!c) return;
     if (field === 'enabled') c.enabled = e.target.checked;
-    else c[field] = e.target.value.trim();
-    card.classList.toggle('ok', !!(c.apiKey || c.local));
+    else {
+      c[field] = e.target.value.trim();
+      delete c.lastTest; // configuração mudou: o último teste não vale mais
+      if (field === 'apiKey' && c.apiKey && c.enabled !== true) {
+        c.enabled = true; // colar uma chave já ativa o provedor
+        const sw = card.querySelector('[data-field="enabled"]');
+        if (sw) sw.checked = true;
+      }
+    }
+    card.className = 'conn' + cardState(c);
     const pill = card.querySelector('.pill');
     if (pill) pill.outerHTML = statusPill(c);
+    const st = card.querySelector('.status');
+    if (st && field !== 'enabled') {
+      st.className = 'status';
+      st.textContent = '';
+    }
     save();
   });
   list.addEventListener('click', async (e) => {
@@ -150,9 +177,19 @@ function bindConnections() {
       }
       const r = await P.testConnection(c);
       test.disabled = false;
+      c.lastTest = { ok: r.ok, message: r.message, ts: Date.now() };
+      if (r.ok && c.enabled !== true) {
+        c.enabled = true; // teste bem-sucedido ativa o provedor
+        const sw = card.querySelector('[data-field="enabled"]');
+        if (sw) sw.checked = true;
+      }
+      card.className = 'conn' + cardState(c);
+      const pill = card.querySelector('.pill');
+      if (pill) pill.outerHTML = statusPill(c);
       st.className = 'status ' + (r.ok ? 'ok' : 'err');
-      st.textContent = r.ok ? '✓ ' + r.message : '✗ ' + r.message;
+      st.textContent = lastTestText(c);
       if (r.ok && r.models) await S.setModelCache(c.id, r.models);
+      await save({ immediate: true });
       return;
     }
     const rm = e.target.closest('[data-remove]');

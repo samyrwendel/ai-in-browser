@@ -678,10 +678,19 @@ async function addFiles(files) {
         }
         const img = await fileToImage(f);
         state.attachments.push({ kind: 'image', name: f.name || 'imagem', data: img.data, mediaType: img.mediaType, preview: `data:${img.mediaType};base64,${img.data}` });
-      } else if (f.size <= 2 * 1024 * 1024) {
+      } else if (/^(audio|video)\//.test(f.type)) {
+        toast(`Áudio e vídeo ainda não são suportados ("${f.name}"). Anexe imagens ou arquivos de texto.`, 'err', 5000);
+      } else if (f.size > 2 * 1024 * 1024) {
+        toast(`"${f.name}" é muito grande (máx. 2 MB).`, 'err');
+      } else {
         const text = await f.text();
+        // arquivos binários viravam texto ilegível e eram enviados assim ao modelo
+        if (/\uFFFD/.test(text.slice(0, 4000)) || /[\x00-\x08\x0E-\x1F]/.test(text.slice(0, 4000))) {
+          toast(`"${f.name}" não parece um arquivo de texto e não pode ser anexado.`, 'err', 5000);
+          continue;
+        }
         state.attachments.push({ kind: 'file', name: f.name, text: text.slice(0, 200000) });
-      } else toast(`"${f.name}" é muito grande (máx. 2 MB).`, 'err');
+      }
     } catch (e) {
       toast(`Não foi possível anexar "${f.name}": ${e.message}`, 'err');
     }

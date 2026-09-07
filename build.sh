@@ -17,7 +17,7 @@ zip -qr "$OUT" \
   common.css \
   lib icons \
   LICENSE \
-  -x "*.DS_Store" "icons/icon.svg"
+  -x "*.DS_Store" "icons/*.svg" "icons/_*"
 
 echo "Pacote: $OUT"
 unzip -l "$OUT" | tail -n 3

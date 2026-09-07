@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="AI in Browser">
+  <defs>
+    <linearGradient id="sg" x1="72" y1="52" x2="446" y2="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8259F5"/>
+      <stop offset="0.52" stop-color="#4F8EF7"/>
+      <stop offset="1" stop-color="#21D4E8"/>
+    </linearGradient>
+  </defs>
+  <!-- fundo cheio: sem moldura de janela, que some nos tamanhos pequenos -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#sg)"/>
+  <!-- barra do navegador reduzida a um traço, ainda legível a 16px -->
+  <rect x="96" y="120" width="320" height="26" rx="13" fill="#0B0F1C" fill-opacity="0.55"/>
+  <!-- chevrons bem grossos: o que sobrevive a 16 pixels -->
+  <path d="M212 210 L146 288 L212 366" fill="none" stroke="#FFFFFF" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M300 210 L366 288 L300 366" fill="none" stroke="#FFFFFF" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

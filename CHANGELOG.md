@@ -4,6 +4,14 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.3] — 2026-09-07
+
+### Corrigido
+- Ícone ilegível nos tamanhos pequenos. A moldura da janela, os pontinhos e o
+  brilho viravam um borrão a 16 e 32 pixels, e o favicon da aba não era
+  reconhecível. Esses dois tamanhos passam a usar uma marca simplificada, com
+  os chevrons em traço grosso; 48 e 128 mantêm o logotipo completo.
+
 ## [1.0.2] — 2026-09-07
 
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.

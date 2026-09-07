@@ -27,7 +27,7 @@
 - **Conversa com consciência da página** — anexe o texto da aba atual com um clique, selecione um trecho e use o botão direito, ou deixe o agente ler sozinho.
 - **Modo Navegar (agente)** — o modelo vê a página (elementos numerados + texto), clica, digita, rola, seleciona opções, abre e troca abas, espera carregamentos, lê o HTML vivo e o **código-fonte**, executa JavaScript, lê console e rede, tira **capturas de tela com etiquetas numeradas** para modelos com visão e pergunta a você antes de ações sensíveis. É um Playwright rodando dentro do Chrome, via `chrome.scripting` e o **Chrome DevTools Protocol** (`chrome.debugger`).
 - **Centenas de modelos** — Claude, GPT, Gemini, DeepSeek, Grok, Llama, Qwen, Mistral… via OpenRouter, com preço e contexto ao escolher. LLMs locais (Ollama/LM Studio) detectados automaticamente.
-- **Barra de composição completa** — anexos (imagens e arquivos de texto, colar ou arrastar), captura da aba atual, ditado por voz, seletor de esforço de raciocínio (Auto/Baixo/Médio/Alto), troca de modelo com <kbd>Ctrl</kbd>+<kbd>K</kbd>.
+- **Barra de composição completa** — anexos (imagens e arquivos de texto, colar ou arrastar), captura da aba atual, ditado por voz pelo microfone (transcrição feita pelo navegador, o áudio nunca vai ao provedor), seletor de esforço de raciocínio, troca de modelo com <kbd>Ctrl</kbd>+<kbd>K</kbd>. Arquivos de áudio e vídeo ainda não são suportados.
 - **Streaming**, Markdown completo com realce de código, tabelas, bloco de raciocínio, tokens e custo por resposta.
 - **Histórico** com busca, exportação em Markdown, backup JSON. Tema escuro/claro, 6 cores, tamanho de fonte.
 - **Privado** — chaves só em `chrome.storage.local`, enviadas apenas para a URL do provedor. Sem telemetria, sem servidor intermediário.
@@ -114,6 +114,7 @@ lib/storage.js     armazenamento
 
 | Permissão | Quando é pedida | Se você recusar |
 |---|---|---|
+| `audioCapture` | No primeiro clique no microfone | O ditado por voz não funciona; dá para conceder depois em Configurações |
 | `history` | Ao ligar "Permitir histórico e downloads" | A ferramenta de busca no histórico não aparece para o modelo |
 | `downloads` | Idem | A ferramenta de download não aparece para o modelo |
 

@@ -722,3 +722,14 @@
 .effort-menu, .coop-menu { top: auto; bottom: 100%; margin-bottom: 6px; }
 .coop-menu { left: 12px; }
 .effort-menu { right: 12px; left: auto; }
+
+/* ===== botão de enviar dentro da caixa; alça de altura no topo ===== */
+.composer .box { position: relative; }
+.composer textarea { resize: none; padding: 14px 54px 14px 14px; }
+.composer textarea::-webkit-resizer { display: none; }
+.composer .box .send-btn {
+  position: absolute; right: 9px; bottom: 9px; width: 30px; height: 30px; border-radius: 9px;
+}
+.box-grip { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); width: 56px; height: 12px; cursor: ns-resize; z-index: 2; touch-action: none; }
+.box-grip::before { content: ""; display: block; margin: 4px auto 0; width: 34px; height: 4px; border-radius: 4px; background: var(--border-2); opacity: .7; transition: background .15s, opacity .15s; }
+.box:hover .box-grip::before, .box-grip:active::before { background: rgba(var(--accent-rgb), .8); opacity: 1; }

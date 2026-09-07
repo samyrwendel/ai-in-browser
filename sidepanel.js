@@ -1897,8 +1897,38 @@ function bindEvents() {
     autoResize();
     setSendState();
   });
-  els.input.addEventListener('pointerup', rememberManualHeight);
-  els.input.addEventListener('mouseup', rememberManualHeight);
+  // alça no topo da caixa: arrastar ajusta a altura; clique duplo volta ao automático
+  const grip = els.boxGrip;
+  let dragY = 0;
+  let dragH = 0;
+  let dragging = false;
+  grip.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    grip.setPointerCapture(e.pointerId);
+    dragging = true;
+    dragY = e.clientY;
+    dragH = els.input.offsetHeight;
+  });
+  grip.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const max = Math.round(window.innerHeight * 0.7);
+    els.input.style.height = Math.max(74, Math.min(max, dragH + (dragY - e.clientY))) + 'px';
+  });
+  const endDrag = async (e) => {
+    if (!dragging) return;
+    dragging = false;
+    try {
+      grip.releasePointerCapture(e.pointerId);
+    } catch {}
+    await rememberManualHeight();
+  };
+  grip.addEventListener('pointerup', endDrag);
+  grip.addEventListener('pointercancel', endDrag);
+  grip.addEventListener('dblclick', async () => {
+    state.settings.composerHeight = 0;
+    await saveSettings();
+    autoResize();
+  });
   els.input.addEventListener('keydown', (e) => {
     if (e.isComposing) return;
     const onEnter = state.settings.sendOnEnter !== false;
@@ -2090,6 +2120,7 @@ async function init() {
     btnModelMini: $('#btn-model-mini'),
     modelMiniName: $('#model-mini-name'),
     btnSend: $('#btn-send'),
+    boxGrip: $('#box-grip'),
     btnAttach: $('#btn-attach'),
     fileInput: $('#file-input'),
     btnBrowse: $('#btn-browse'),

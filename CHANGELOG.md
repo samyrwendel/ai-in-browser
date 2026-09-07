@@ -30,8 +30,10 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ### Alterado
 - Composição no estilo do Claude Code: a caixa com borda contém só o texto e os
   controles ficam numa linha própria, colada à borda inferior, que quebra em
-  duas linhas apenas quando não cabe (ferramentas à esquerda; modelo, esforço,
-  voz e enviar à direita). A caixa de texto
+  duas linhas apenas quando não cabe (ferramentas à esquerda; modelo, esforço
+  e voz à direita). O botão de enviar/parar fica dentro da caixa, no canto
+  inferior direito, e a altura se ajusta por uma alça no topo da caixa
+  (clique duplo volta ao automático). A caixa de texto
   começa com três linhas e cresce até 45% da altura do painel, para revisar e
   editar o prompt antes de enviar; também pode ser redimensionada pela alça do
   canto, e a altura escolhida é lembrada. Itens da barra e nomes de modelo

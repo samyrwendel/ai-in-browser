@@ -655,7 +655,8 @@
    A caixa de texto começa com três linhas e cresce até 45% da altura do painel,
    para revisar e editar o prompt antes de enviar. */
 .composer { container-type: inline-size; padding: 12px 12px 10px 14px; }
-.composer textarea { min-height: 66px; max-height: 45vh; padding: 2px 0 6px; }
+.composer textarea { min-height: 66px; max-height: 70vh; padding: 2px 0 6px; resize: vertical; }
+.composer textarea::-webkit-resizer { background: linear-gradient(135deg, transparent 0 50%, var(--text-3) 50% 60%, transparent 60% 70%, var(--text-3) 70% 80%, transparent 80%); opacity: .6; border-radius: 0 0 6px 0; }
 .composer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; row-gap: 8px; min-width: 0; margin-top: 4px; }
 .composer-left { flex: 1 1 100%; min-width: 0; display: flex; align-items: center; gap: 6px; }
 .composer-right { flex: 1 1 100%; min-width: 0; display: flex; align-items: center; gap: 6px; }
@@ -676,3 +677,21 @@
   .effort-btn span { display: none; }
   .effort-btn { width: 30px; padding: 0 6px; justify-content: center; }
 }
+
+/* itens da barra menores e mais discretos */
+.composer .tool-btn { height: 26px; padding: 0 8px; font-size: 11.5px; gap: 5px; border-radius: 8px; }
+.composer .tool-btn svg { width: 14px; height: 14px; }
+.composer .tool-btn.icon-only { width: 28px; padding: 0 5px; }
+.composer .model-mini { font-size: 11.5px; color: var(--text-3); }
+.composer .coop-count { font-size: 9.5px; line-height: 14px; padding: 0 4px; }
+.composer .composer-actions { row-gap: 6px; }
+.composer .send-btn { width: 32px; height: 32px; border-radius: 10px; }
+.composer .send-btn svg { width: 17px; height: 17px; }
+
+/* nomes de modelo menores e discretos */
+.composer .model-mini { font-size: 10.5px; color: var(--text-3); letter-spacing: .01em; }
+.composer .effort-btn { font-size: 10.5px; }
+.model-btn .model-name { font-size: 12.5px; }
+.model-btn .model-sub { font-size: 10.5px; }
+.msg-model { font-size: 10.5px; }
+.helper-chip { font-size: 10px; }

@@ -1705,13 +1705,32 @@ async function handleStorageChange(changes, area) {
 
 // ---------- composer ----------
 
+// A caixa cresce sozinha até 45% do painel; se o usuário arrastar a alça, a
+// altura escolhida passa a valer (e é lembrada) até ele arrastar de novo.
 function autoResize() {
   const ta = els.input;
+  const manual = Number(state.settings?.composerHeight) || 0;
+  if (manual >= 66) {
+    ta.style.height = Math.min(manual, Math.round(window.innerHeight * 0.7)) + 'px';
+    state.autoHeight = ta.offsetHeight;
+    return;
+  }
   ta.style.height = 'auto';
   const max = Math.max(160, Math.round(window.innerHeight * 0.45));
   ta.style.height = Math.max(66, Math.min(ta.scrollHeight, max)) + 'px';
+  state.autoHeight = ta.offsetHeight;
 }
 window.addEventListener('resize', () => autoResize());
+
+async function rememberManualHeight() {
+  const ta = els.input;
+  const h = ta.offsetHeight;
+  if (!h || h === state.autoHeight) return; // não foi um arraste
+  // arrastar até o mínimo devolve o modo automático
+  state.settings.composerHeight = h <= 70 ? 0 : h;
+  state.autoHeight = h;
+  await saveSettings();
+}
 
 // ---------- eventos ----------
 
@@ -1878,6 +1897,8 @@ function bindEvents() {
     autoResize();
     setSendState();
   });
+  els.input.addEventListener('pointerup', rememberManualHeight);
+  els.input.addEventListener('mouseup', rememberManualHeight);
   els.input.addEventListener('keydown', (e) => {
     if (e.isComposing) return;
     const onEnter = state.settings.sendOnEnter !== false;
@@ -2118,6 +2139,7 @@ async function init() {
   else startNewChat(false);
   setSendState();
   updateHeader();
+  autoResize(); // aplica a altura lembrada da caixa de texto
 
   await detectLocal();
   await bootstrapModels();

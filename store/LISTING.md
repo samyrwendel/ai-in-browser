@@ -27,6 +27,9 @@ VOCÊ ESCOLHE O MODELO
 • Modelos locais — Ollama e LM Studio são detectados automaticamente. Sem chave, sem nuvem, 100% offline.
 • Qualquer endpoint compatível — Groq, DeepSeek, xAI, Mistral, Together, Gemini, vLLM, llama.cpp, Jan e o que mais você configurar.
 
+COOPERAÇÃO ENTRE MODELOS
+Seu modelo local não tem visão? Outro modelo ativo descreve a imagem para ele. Não tem tool calling? Outro conduz o agente. Precisa de raciocínio profundo ou de contexto maior? A extensão passa a vez e mostra quem ajudou. Cada habilidade pode ficar em automático, fixa num modelo ou desligada.
+
 CONVERSA COM CONTEXTO DA PÁGINA
 • Anexe o texto da aba atual com um clique.
 • Selecione um trecho e use o botão direito para perguntar sobre ele.

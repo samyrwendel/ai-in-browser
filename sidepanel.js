@@ -5,6 +5,7 @@ import * as P from './lib/providers.js';
 import { createBrowser, captureActiveTab } from './lib/browser.js';
 import { AgentRunner } from './lib/agent.js';
 import * as PERM from './lib/perms.js';
+import * as R from './lib/roles.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -429,6 +430,7 @@ function createMessageNode(msg) {
     return el;
   }
   el.innerHTML = `<div class="msg-head"><span class="avatar"><svg><use href="#i-sparkle"/></svg></span><span class="msg-author"></span><span class="msg-model"></span>${msg.agent ? '<span class="mode-pill"><svg><use href="#i-cursor"/></svg>Navegar</span>' : ''}</div>
+    <div class="helpers"></div>
     <div class="reasoning hidden"><details><summary>Raciocínio</summary><div class="md"></div></details></div>
     <div class="agent-run hidden"></div>
     <div class="content"><div class="md"></div></div>
@@ -479,6 +481,7 @@ function agentRunHtml(msg) {
 function updateAssistantNode(el, msg) {
   const md = $('.content .md', el);
   md.innerHTML = renderMd(msg.content || '');
+  refreshHead(el, msg);
   const run = $('.agent-run', el);
   if (msg.agent) {
     run.classList.remove('hidden');
@@ -738,19 +741,109 @@ function userText(m) {
   return text;
 }
 
-function userContent(m) {
-  const text = userText(m);
-  if (m.images?.length) return [{ type: 'text', text: text || 'Veja a imagem.' }, ...m.images.map((im) => ({ type: 'image', data: im.data, mediaType: im.mediaType }))];
+function userContent(m, vision = true) {
+  let text = userText(m);
+  if (m.images?.length && vision) return [{ type: 'text', text: text || 'Veja a imagem.' }, ...m.images.map((im) => ({ type: 'image', data: im.data, mediaType: im.mediaType }))];
+  if (m.images?.length && m.imageDescriptions?.length) {
+    text = `${text}\n\n[${m.images.length === 1 ? 'Imagem anexada, descrita por um modelo com visão' : 'Imagens anexadas, descritas por um modelo com visão'}]\n${m.imageDescriptions.join('\n\n')}`;
+  } else if (m.images?.length) {
+    text = `${text}\n\n[O usuário anexou ${m.images.length} imagem(ns), mas este modelo não enxerga imagens.]`;
+  }
   return text;
 }
 
-function buildApiMessages(messages) {
+function buildApiMessages(messages, { vision = true } = {}) {
   const out = [];
   for (const m of messages) {
-    if (m.role === 'user') out.push({ role: 'user', content: userContent(m) });
+    if (m.role === 'user') out.push({ role: 'user', content: userContent(m, vision) });
     else if (m.role === 'assistant' && m.content && !m.error) out.push({ role: 'assistant', content: m.content });
   }
   return out;
+}
+
+// ---------- cooperação entre modelos ----------
+
+function mainSel() {
+  return { connectionId: state.settings.current.connectionId, modelId: state.settings.current.modelId };
+}
+
+async function modelsForRoles() {
+  const conns = visibleConnections();
+  await Promise.all(conns.map((c) => ensureModels(c.id)));
+  const out = {};
+  for (const c of conns) out[c.id] = state.models[c.id] || [];
+  return out;
+}
+
+// Devolve o ajudante para um papel, ou null quando o principal já cobre / nada disponível.
+async function resolveHelper(roleId, main) {
+  const mb = await modelsForRoles();
+  const r = R.resolveRole(roleId, state.settings, mb, main || mainSel());
+  if (!r || r.source === 'main') return null;
+  const c = conn(r.connectionId);
+  if (!c) return null;
+  return { role: roleId, conn: c, connectionId: c.id, modelId: r.modelId, name: r.name || P.prettyName(r.modelId), source: r.source, cap: r.cap };
+}
+
+function helperChipsHtml(helpers) {
+  return (helpers || [])
+    .map((h) => {
+      const role = R.ROLES.find((r) => r.id === h.role);
+      const title = h.source === 'pinned' ? 'fixado em Configurações → Cooperação' : 'escolhido automaticamente';
+      return `<span class="helper-chip" title="${title}">${role?.icon || '🤝'} ${esc(role?.label || h.role)}: ${esc(h.name || h.modelId)}</span>`;
+    })
+    .join('');
+}
+
+function refreshHead(node, msg) {
+  const m = $('.msg-model', node);
+  if (m) m.textContent = modelLabel(msg);
+  const h = $('.helpers', node);
+  if (h) h.innerHTML = helperChipsHtml(msg.helpers);
+}
+
+async function describePendingImages(mainConn, mainModelId, helpers, signal) {
+  if (P.modelSupportsVision(mainConn, modelInfo(mainConn.id, mainModelId))) return;
+  const pending = state.chat.messages.filter((m) => m.role === 'user' && m.images?.length && !m.imageDescriptions);
+  if (!pending.length) return;
+  const h = await resolveHelper('vision', { connectionId: mainConn.id, modelId: mainModelId });
+  if (!h) {
+    for (const m of pending) m.imageDescriptions = ['(o modelo atual não enxerga imagens e nenhum modelo com visão está ativo para descrevê-las; ative um em Configurações → Cooperação)'];
+    return;
+  }
+  const n = pending.reduce((acc, m) => acc + m.images.length, 0);
+  setAgentStatus(`Descrevendo ${n} ${n === 1 ? 'imagem' : 'imagens'} com ${h.name}…`);
+  for (const m of pending) {
+    try {
+      m.imageDescriptions = [await R.describeImages(h.conn, h.modelId, m.images, { purpose: 'chat', question: m.content, signal })];
+    } catch (e) {
+      if (signal?.aborted) throw e;
+      m.imageDescriptions = [`(não foi possível descrever as imagens com ${h.name}: ${P.networkErrorMessage(e, h.conn) || e?.message || e})`];
+    }
+  }
+  helpers.push(h);
+  setAgentStatus(null);
+  persist();
+}
+
+async function maybeGenerateTitle() {
+  const chat = state.chat;
+  if (!chat || chat.titleGenerated || chat.messages.length < 2) return;
+  const first = chat.messages.find((m) => m.role === 'user');
+  if (!first?.content) return;
+  const mb = await modelsForRoles();
+  const r = R.resolveRole('fast', state.settings, mb, mainSel());
+  const c = r && conn(r.connectionId);
+  if (!c) return;
+  chat.titleGenerated = true;
+  try {
+    const t = await R.generateTitle(c, r.modelId, first.content);
+    if (t && state.chat?.id === chat.id) {
+      chat.title = t;
+      persist();
+      updateHeader();
+    }
+  } catch {}
 }
 
 function setSendState() {
@@ -829,11 +922,26 @@ function setAgentStatus(text) {
 }
 
 async function runAgentTask(text, ctx, userMsg) {
-  const c = currentConn();
-  const modelId = state.settings.current.modelId;
-  const mInfo = modelInfo(c.id, modelId) || { id: modelId };
   const s = state.settings;
-  const msg = { id: uid(), role: 'assistant', agent: true, content: '', steps: [], ts: Date.now(), model: modelId, connectionId: c.id, pending: true, status: 'running' };
+  let c = currentConn();
+  let modelId = s.current.modelId;
+  const helpers = [];
+  const mb = await modelsForRoles();
+  // papel de navegação: outro modelo pode conduzir o agente
+  const ar = R.resolveRole('agent', s, mb, mainSel());
+  if (ar && ar.source !== 'main' && conn(ar.connectionId)) {
+    c = conn(ar.connectionId);
+    modelId = ar.modelId;
+    helpers.push({ role: 'agent', connectionId: c.id, modelId, name: ar.name, source: ar.source });
+  }
+  const mInfo = modelInfo(c.id, modelId) || { id: modelId };
+  // papel de visão: descreve as capturas quando o condutor não enxerga
+  let visionHelper = null;
+  if (s.agent?.screenshots !== false && !P.modelSupportsVision(c, mInfo)) {
+    const vr = R.resolveRole('vision', s, mb, { connectionId: c.id, modelId });
+    if (vr && vr.source !== 'main' && conn(vr.connectionId)) visionHelper = { conn: conn(vr.connectionId), modelId: vr.modelId, name: vr.name };
+  }
+  const msg = { id: uid(), role: 'assistant', agent: true, content: '', steps: [], ts: Date.now(), model: modelId, connectionId: c.id, pending: true, status: 'running', helpers };
   state.chat.messages.push(msg);
   const node = appendMessage(msg);
   const perms = await PERM.granted();
@@ -846,6 +954,7 @@ async function runAgentTask(text, ctx, userMsg) {
     browser,
     settings: s,
     perms,
+    visionHelper,
     onEvent: (ev) => {
       if (ev.type === 'step') {
         const i = msg.steps.findIndex((x) => x.id === ev.step.id);
@@ -857,6 +966,11 @@ async function runAgentTask(text, ctx, userMsg) {
         scrollToBottom();
       } else if (ev.type === 'status') {
         setAgentStatus(ev.text);
+      } else if (ev.type === 'helper') {
+        if (!msg.helpers.some((h) => h.role === ev.role && h.modelId === ev.modelId)) {
+          msg.helpers.push({ role: ev.role, connectionId: ev.connectionId, modelId: ev.modelId, name: ev.name, source: visionHelper?.source || 'auto' });
+          updateAssistantNode(node, msg);
+        }
       } else if (ev.type === 'ask') {
         msg.question = ev.question;
         msg.questionAnswered = false;
@@ -974,17 +1088,8 @@ function toggleMic() {
   }
 }
 
-async function runAssistant() {
-  const c = currentConn();
-  const modelId = state.settings.current.modelId;
-  const msg = { id: uid(), role: 'assistant', content: '', reasoning: '', ts: Date.now(), model: modelId, connectionId: c.id, pending: true };
-  state.chat.messages.push(msg);
-  const node = appendMessage(msg);
-  const abort = new AbortController();
-  state.streaming = { abort, msg, node };
-  state.autoScroll = true;
-  setSendState();
-
+async function streamInto(msg, node, c, modelId, history, abort) {
+  const s = state.settings;
   let dirty = false;
   let raf = 0;
   const schedule = () => {
@@ -998,11 +1103,7 @@ async function runAssistant() {
       scrollToBottom();
     });
   };
-
-  const t0 = performance.now();
   try {
-    const history = buildApiMessages(state.chat.messages.slice(0, -1));
-    const s = state.settings;
     for await (const ev of P.chatStream(c, {
       model: modelId,
       messages: history,
@@ -1025,11 +1126,84 @@ async function runAssistant() {
         msg.finish = ev.reason;
       }
     }
+  } finally {
+    if (raf) cancelAnimationFrame(raf);
+  }
+}
+
+async function runAssistant() {
+  const s = state.settings;
+  let c = currentConn();
+  let modelId = s.current.modelId;
+  const helpers = [];
+  const abort = new AbortController();
+  const msg = { id: uid(), role: 'assistant', content: '', reasoning: '', ts: Date.now(), model: modelId, connectionId: c.id, pending: true, helpers };
+  state.chat.messages.push(msg);
+  const node = appendMessage(msg);
+  state.streaming = { abort, msg, node };
+  state.autoScroll = true;
+  setSendState();
+  const t0 = performance.now();
+
+  try {
+    // 1) visão: outro modelo descreve as imagens anexadas se o principal não enxerga
+    await describePendingImages(c, modelId, helpers, abort.signal);
+
+    // 2) raciocínio profundo: esforço Alto num modelo sem raciocínio passa a vez
+    if (s.effort === 'high' && !R.capabilities(c, modelInfo(c.id, modelId)).reasoning) {
+      const h = await resolveHelper('reasoning');
+      if (h) {
+        c = h.conn;
+        modelId = h.modelId;
+        helpers.push(h);
+      }
+    }
+
+    let vision = P.modelSupportsVision(c, modelInfo(c.id, modelId));
+    let history = buildApiMessages(state.chat.messages.slice(0, -1), { vision });
+
+    // 3) documentos longos: se não cabe no contexto do principal, passa a um modelo maior
+    const ctx = Number(modelInfo(c.id, modelId)?.context) || 0;
+    const est = R.estimateTokens(history, buildSystem());
+    if (ctx && est > ctx * 0.85) {
+      const h = await resolveHelper('longContext', { connectionId: c.id, modelId });
+      if (h && (!h.cap?.context || h.cap.context > est)) {
+        c = h.conn;
+        modelId = h.modelId;
+        helpers.push(h);
+        vision = P.modelSupportsVision(c, modelInfo(c.id, modelId));
+        history = buildApiMessages(state.chat.messages.slice(0, -1), { vision });
+      }
+    }
+
+    msg.model = modelId;
+    msg.connectionId = c.id;
+    refreshHead(node, msg);
+    await streamInto(msg, node, c, modelId, history, abort);
   } catch (e) {
     if (abort.signal.aborted) msg.stopped = true;
-    else msg.error = P.networkErrorMessage(e, c) || e.message || String(e);
+    else {
+      // 4) reserva: falha de rede, limite ou erro do servidor tenta outro modelo uma vez
+      const h = R.isRetryableError(e) ? await resolveHelper('fallback', { connectionId: c.id, modelId }).catch(() => null) : null;
+      if (h && !abort.signal.aborted) {
+        helpers.push(h);
+        msg.content = '';
+        msg.reasoning = '';
+        msg.model = h.modelId;
+        msg.connectionId = h.conn.id;
+        refreshHead(node, msg);
+        setAgentStatus(`${c.name} falhou; tentando com ${h.name}…`);
+        try {
+          const vision2 = P.modelSupportsVision(h.conn, modelInfo(h.conn.id, h.modelId));
+          await streamInto(msg, node, h.conn, h.modelId, buildApiMessages(state.chat.messages.slice(0, -1), { vision: vision2 }), abort);
+        } catch (e2) {
+          if (abort.signal.aborted) msg.stopped = true;
+          else msg.error = `${P.networkErrorMessage(e, c) || e?.message || e} · A reserva (${h.name}) também falhou: ${P.networkErrorMessage(e2, h.conn) || e2?.message || e2}`;
+        }
+      } else msg.error = P.networkErrorMessage(e, c) || e?.message || String(e);
+    }
   }
-  if (raf) cancelAnimationFrame(raf);
+  setAgentStatus(null);
   msg.pending = false;
   msg.duration = performance.now() - t0;
   if (!msg.content && !msg.error && !msg.stopped) msg.error = 'O modelo não retornou conteúdo. Tente novamente ou troque de modelo.';
@@ -1038,6 +1212,7 @@ async function runAssistant() {
   updateAssistantNode(node, msg);
   scrollToBottom();
   persist();
+  maybeGenerateTitle();
 }
 
 async function regenerate(msgId) {

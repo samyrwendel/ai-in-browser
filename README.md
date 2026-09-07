@@ -67,6 +67,21 @@ Modelos com *tool calling* nativo (OpenRouter, OpenAI, Anthropic, Llama 3.x/Qwen
 
 Em *Configurações → Agente* você define o máximo de ações, sites bloqueados, se usa o DevTools Protocol e se envia capturas.
 
+## Cooperação entre modelos
+
+Um modelo local pode não ter visão; um modelo barato pode não ter tool calling; um modelo pequeno pode não caber a página inteira. Em vez de obrigar você a trocar de modelo, a extensão deixa outro modelo ativo cobrir a habilidade que falta:
+
+| Papel | Quando entra | Exemplo |
+|---|---|---|
+| Visão | O principal não enxerga e há imagem anexada ou captura do agente | GLM local conversa, Claude Haiku descreve o print |
+| Navegação | Modo Navegar com um principal sem tool calling nativo | Qwen local conversa, GPT-5 conduz o agente |
+| Raciocínio profundo | Esforço em Alto num principal sem raciocínio | DeepSeek R1 assume a resposta |
+| Documentos longos | A mensagem não cabe no contexto do principal | Gemini com 1M de contexto assume |
+| Tarefas auxiliares | Títulos de conversa e resumos | Só modelos locais ou gratuitos no automático |
+| Reserva | O principal falha por limite, erro ou rede | Outro modelo responde e a mensagem mostra "Reserva" |
+
+Em *Configurações → Cooperação* cada papel pode ficar em **Automático** (a extensão ranqueia os modelos ativos: locais e gratuitos primeiro, depois favoritos e destaques, e explica a escolha), **Fixo** (sempre o modelo que você escolher, com uma lista de sugeridos) ou **Desligado**. O principal continua respondendo sempre que ele mesmo dá conta, e cada mensagem exibe quem cooperou.
+
 ## Como funciona
 
 | Conexão | Endpoint | Observações |

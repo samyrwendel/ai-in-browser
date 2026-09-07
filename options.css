@@ -147,3 +147,24 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   .content { padding: 22px 18px 60px; }
   .grid2, .conn-body { grid-template-columns: 1fr; }
 }
+
+/* ---- cooperação ---- */
+.roles { display: flex; flex-direction: column; gap: 12px; }
+.role { background: var(--bg-2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.role.pinned { border-color: rgba(var(--accent-rgb), .40); }
+.role.off { opacity: .72; }
+.role-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.role-ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 17px; background: var(--surface-2); border: 1px solid var(--border); flex: none; }
+.role-title { flex: 1; min-width: 200px; }
+.role-title b { display: block; font-size: 14.5px; }
+.role-title span { display: block; font-size: 12.5px; color: var(--text-2); margin-top: 2px; }
+.role-pick { display: flex; flex-direction: column; gap: 6px; }
+.role-pick select { font-size: 13px; }
+.role-auto { font-size: 12.5px; color: var(--text-2); }
+.role-auto b { color: var(--text); font-weight: 600; }
+.role-auto.err { color: var(--danger); }
+.role-sugg { display: flex; flex-wrap: wrap; gap: 6px; }
+.role-sugg button { font-size: 11.5px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); }
+.role-sugg button:hover { background: var(--surface-3); color: var(--text); border-color: rgba(var(--accent-rgb), .45); }
+.role-sugg button b { color: var(--text); font-weight: 600; }
+.role-sugg button.active { background: rgba(var(--accent-rgb), .16); border-color: rgba(var(--accent-rgb), .45); color: var(--text); }

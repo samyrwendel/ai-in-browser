@@ -2,6 +2,7 @@
 import * as S from './lib/storage.js';
 import * as P from './lib/providers.js';
 import * as PERM from './lib/perms.js';
+import * as R from './lib/roles.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -151,6 +152,7 @@ function bindConnections() {
       st.textContent = '';
     }
     save();
+    if (field === 'enabled') loadRoleModels().then(renderRoles);
   });
   list.addEventListener('click', async (e) => {
     const eye = e.target.closest('[data-eye]');
@@ -190,6 +192,7 @@ function bindConnections() {
       st.textContent = lastTestText(c);
       if (r.ok && r.models) await S.setModelCache(c.id, r.models);
       await save({ immediate: true });
+      loadRoleModels().then(renderRoles);
       return;
     }
     const rm = e.target.closest('[data-remove]');
@@ -493,6 +496,126 @@ function bindGeneralValues() {
   $$('#accent-swatches button').forEach((b) => b.classList.toggle('active', b.dataset.accent === (settings.accent || 'violet')));
 }
 
+// ---------- cooperação entre modelos ----------
+
+let modelsByConn = {};
+
+async function loadRoleModels(force = false) {
+  const status = $('#roles-status');
+  const cache = await S.getModelCache();
+  modelsByConn = {};
+  const active = settings.connections.filter((c) => c.enabled === true);
+  if (!active.length) {
+    status.textContent = 'Nenhum provedor ativo. Ative ao menos um em Conexões.';
+    return;
+  }
+  status.textContent = 'Carregando modelos…';
+  await Promise.all(
+    active.map(async (c) => {
+      const hit = cache[c.id];
+      if (!force && hit?.models?.length) {
+        modelsByConn[c.id] = hit.models;
+        return;
+      }
+      try {
+        const list = await P.fetchModels(c);
+        modelsByConn[c.id] = list;
+        await S.setModelCache(c.id, list);
+      } catch {
+        modelsByConn[c.id] = hit?.models || [];
+      }
+    })
+  );
+  const total = Object.values(modelsByConn).reduce((n, l) => n + l.length, 0);
+  status.textContent = `${total} modelos em ${active.length} ${active.length === 1 ? 'conexão ativa' : 'conexões ativas'}`;
+}
+
+function roleOption(c, cfg, i) {
+  const badges = R.capabilityBadges(c.cap).join(' · ');
+  const sel = cfg.connectionId === c.connectionId && cfg.modelId === c.modelId ? ' selected' : '';
+  return `<option value="${esc(c.connectionId)}|${esc(c.modelId)}"${sel}>${i < 3 ? '★ ' : ''}${esc(c.name)} · ${esc(c.connectionName)}${badges ? ' — ' + esc(badges) : ''}</option>`;
+}
+
+function renderRoles() {
+  const list = $('#roles-list');
+  const main = settings.current;
+  list.innerHTML = R.ROLES.map((role) => {
+    const cfg = { ...R.DEFAULT_ROLES[role.id], ...(settings.roles?.[role.id] || {}) };
+    const cands = R.candidates(role.id, settings, modelsByConn, main);
+    const auto = R.explainAuto(role.id, settings, modelsByConn, main);
+    const pinnedKnown = cands.some((c) => c.connectionId === cfg.connectionId && c.modelId === cfg.modelId);
+    let options = cands.map((c, i) => roleOption(c, cfg, i)).join('');
+    if (cfg.mode === 'pinned' && cfg.connectionId && cfg.modelId && !pinnedKnown) {
+      options = `<option value="${esc(cfg.connectionId)}|${esc(cfg.modelId)}" selected>${esc(cfg.modelId)} · ${esc(cfg.connectionId)} (fora da lista atual)</option>` + options;
+    }
+    if (!options) options = '<option value="">nenhum modelo ativo tem essa habilidade</option>';
+    const sugg = cands
+      .filter((c) => !(c.connectionId === main.connectionId && c.modelId === main.modelId))
+      .slice(0, 3)
+      .map((c) => `<button type="button" data-suggest="${esc(c.connectionId)}|${esc(c.modelId)}" class="${cfg.mode === 'pinned' && cfg.connectionId === c.connectionId && cfg.modelId === c.modelId ? 'active' : ''}" title="${esc(c.why.join(', '))}"><b>${esc(c.name)}</b> · ${esc(c.connectionName)}</button>`)
+      .join('');
+    return `<div class="role ${cfg.mode}" data-role="${role.id}">
+      <div class="role-head">
+        <span class="role-ico">${role.icon}</span>
+        <div class="role-title"><b>${esc(role.label)}</b><span>${esc(role.description)}</span></div>
+        <div class="segmented">
+          <button data-mode="auto" class="${cfg.mode === 'auto' ? 'active' : ''}">Automático</button>
+          <button data-mode="pinned" class="${cfg.mode === 'pinned' ? 'active' : ''}">Fixo</button>
+          <button data-mode="off" class="${cfg.mode === 'off' ? 'active' : ''}">Desligado</button>
+        </div>
+      </div>
+      ${cfg.mode === 'pinned' ? `<div class="role-pick"><select class="input" data-pick>${options}</select></div>` : ''}
+      ${cfg.mode !== 'off' ? `<div class="role-auto${auto.ok ? '' : ' err'}">No automático: <b>${esc(auto.text)}</b></div>` : '<div class="role-auto">Sem cooperação: o principal tenta sozinho.</div>'}
+      ${sugg && cfg.mode !== 'off' ? `<div class="role-sugg"><span class="tiny" style="align-self:center">Sugeridos:</span>${sugg}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function bindRoles() {
+  const list = $('#roles-list');
+  list.addEventListener('click', (e) => {
+    const card = e.target.closest('.role');
+    if (!card) return;
+    const id = card.dataset.role;
+    settings.roles = settings.roles || {};
+    const cfg = { ...R.DEFAULT_ROLES[id], ...(settings.roles[id] || {}) };
+    const modeBtn = e.target.closest('[data-mode]');
+    const sugg = e.target.closest('[data-suggest]');
+    if (modeBtn) {
+      cfg.mode = modeBtn.dataset.mode;
+      if (cfg.mode === 'pinned' && !cfg.modelId) {
+        const first = R.candidates(id, settings, modelsByConn, settings.current).find((c) => !(c.connectionId === settings.current.connectionId && c.modelId === settings.current.modelId)) || R.candidates(id, settings, modelsByConn, settings.current)[0];
+        if (first) {
+          cfg.connectionId = first.connectionId;
+          cfg.modelId = first.modelId;
+        }
+      }
+    } else if (sugg) {
+      const [connectionId, modelId] = sugg.dataset.suggest.split('|');
+      cfg.mode = 'pinned';
+      cfg.connectionId = connectionId;
+      cfg.modelId = modelId;
+    } else return;
+    settings.roles[id] = cfg;
+    save();
+    renderRoles();
+  });
+  list.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-pick]');
+    if (!sel) return;
+    const card = e.target.closest('.role');
+    const id = card.dataset.role;
+    const [connectionId, modelId] = sel.value.split('|');
+    settings.roles[id] = { mode: 'pinned', connectionId, modelId };
+    save();
+    renderRoles();
+  });
+  $('#roles-reload').addEventListener('click', async () => {
+    await loadRoleModels(true);
+    renderRoles();
+  });
+}
+
 // ---------- navegação ----------
 
 function bindNav() {
@@ -541,7 +664,10 @@ async function init() {
   bindGeneral();
   bindData();
   bindNav();
+  bindRoles();
+  renderRoles();
   await refreshChatCount();
+  loadRoleModels().then(renderRoles);
 
   S.onStorageChanged(async (changes, area) => {
     if (area !== 'local' || !changes.settings) return;
@@ -552,6 +678,7 @@ async function init() {
     settings.current = fresh.current;
     settings.favorites = fresh.favorites;
     settings.lastModelByConnection = fresh.lastModelByConnection;
+    renderRoles();
     if (fresh.theme !== settings.theme) {
       settings.theme = fresh.theme;
       applyTheme();

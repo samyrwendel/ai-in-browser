@@ -617,3 +617,13 @@
 
 .agent-ask .agent-answer { margin-top: 7px; padding-top: 7px; border-top: 1px solid rgba(var(--accent-rgb), .3); color: var(--text-2); font-size: 12.5px; }
 .agent-ask .agent-answer b { color: var(--text); font-weight: 600; }
+
+/* cooperação entre modelos */
+.helpers { display: flex; flex-wrap: wrap; gap: 4px; margin: -2px 0 8px 32px; }
+.helpers:empty { display: none; }
+.helper-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 6px;
+  background: rgba(var(--accent-2-rgb), .10); border: 1px solid rgba(var(--accent-2-rgb), .30); color: var(--text-2);
+  white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}

@@ -33,6 +33,7 @@
       <nav>
         <a href="#connections" class="nav-link active">Conexões</a>
         <a href="#agent" class="nav-link">Agente (Navegar)</a>
+        <a href="#cooperation" class="nav-link">Cooperação</a>
         <a href="#model" class="nav-link">Modelo e prompt</a>
         <a href="#appearance" class="nav-link">Aparência</a>
         <a href="#behavior" class="nav-link">Comportamento</a>
@@ -130,6 +131,19 @@
             <textarea id="agent-prompt" class="textarea" rows="3" placeholder="Ex.: Sempre use o site X para buscas. Nunca faça compras."></textarea>
           </label>
           <p class="tiny">Por padrão o agente pergunta antes de ações sensíveis (compras, envio de mensagens, exclusões, senhas) e nunca resolve CAPTCHAs. Você pode interromper a qualquer momento com <b>Parar</b> ou <span class="kbd">Esc</span>.</p>
+        </div>
+      </section>
+
+      <!-- ===== Cooperação ===== -->
+      <section id="cooperation" class="section">
+        <div class="section-head">
+          <h2>Cooperação entre modelos</h2>
+          <p class="muted">O modelo principal do chat nem sempre tem todas as habilidades. Para cada uma, escolha quem cobre: <b>Automático</b> deixa a extensão ranquear os modelos ativos (locais e gratuitos primeiro, depois favoritos e destaques), <b>Fixo</b> usa sempre o modelo que você escolher e <b>Desligado</b> não coopera. O principal continua respondendo sempre que ele mesmo dá conta.</p>
+        </div>
+        <div id="roles-list" class="roles"></div>
+        <div class="row-end" style="margin-top:10px">
+          <span id="roles-status" class="tiny" style="margin-right:auto"></span>
+          <button id="roles-reload" class="btn sm">Recarregar modelos</button>
         </div>
       </section>
 

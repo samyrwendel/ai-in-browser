@@ -6,6 +6,18 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [1.0.1] — 2026-09-07
 
+### Adicionado
+- **Cooperação entre modelos.** O modelo principal pode delegar habilidades que
+  não tem a outro modelo ativo, de qualquer provedor: **visão** (descreve
+  imagens anexadas e capturas do agente), **navegação** (conduz o modo
+  Navegar com tool calling nativo), **raciocínio profundo** (assume quando o
+  esforço está em Alto), **documentos longos** (assume quando a mensagem não
+  cabe no contexto), **tarefas auxiliares** (títulos de conversa, só com
+  modelos locais ou gratuitos) e **reserva** (responde quando o principal
+  falha). Cada papel pode ficar em automático, fixo num modelo ou desligado,
+  em Configurações → Cooperação, com sugestões ranqueadas e a explicação do
+  que o automático escolheria. As mensagens mostram quem cooperou.
+
 ### Alterado
 - Provedores começam **desativados** e passam a ativos quando você cola uma
   chave, quando o teste de conexão passa ou quando um servidor local é

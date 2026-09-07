@@ -28,6 +28,11 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   ajudante "melhor" que o principal, fixe-o.
 
 ### Alterado
+- O seletor de modelos lista os lançamentos mais recentes primeiro, com a
+  data de lançamento e a etiqueta "novo" (30 dias), e permite ordenar por
+  nome ou preço; lotes (`:batch`) e apelidos (`~…latest`) só aparecem quando
+  procurados. Nas tabelas de cooperação há a coluna "Lançado" e a prioridade
+  "Recentes".
 - Provedores começam **desativados** e passam a ativos quando você cola uma
   chave, quando o teste de conexão passa ou quando um servidor local é
   detectado no primeiro uso. Só os ativos aparecem no seletor e são sondados.
@@ -77,8 +82,9 @@ Primeira versão pública, preparada para a Chrome Web Store.
 - Temas claro/escuro, seis cores de destaque e tamanho de fonte.
 
 ### Segurança e privacidade
-- `debugger`, `history` e `downloads` são permissões **opcionais**, pedidas
-  apenas quando o recurso é usado.
+- `history` e `downloads` são permissões **opcionais**, pedidas apenas quando o
+  recurso é usado. (`debugger` precisa ser obrigatória: o Chrome não a aceita
+  como opcional.)
 - Lista de domínios bloqueados para o agente e interruptor para desativar a
   execução de JavaScript na página.
 - Nenhuma telemetria: as chaves ficam em `chrome.storage.local` e o tráfego vai

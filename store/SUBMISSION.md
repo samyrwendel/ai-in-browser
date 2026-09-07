@@ -49,7 +49,7 @@ modo Navegar executa uma tarefa simples.
 | Ponto | Como já está tratado |
 |---|---|
 | Permissões amplas sem explicação | Cada permissão tem justificativa pronta em `LISTING.md`. |
-| `debugger` | Declarada como **opcional**: a extensão instala sem ela e só a solicita quando o usuário ativa o modo Navegar. Se recusada, o agente continua funcionando com eventos de DOM. |
+| `debugger` | Obrigatória (o Chrome não a aceita como opcional). A justificativa pronta explica que é usada só durante tarefas do modo Navegar pedidas pelo usuário, e que pode ser desligada em Configurações → Agente, caso em que o agente usa eventos de DOM. |
 | `<all_urls>` | Necessária para falar com a API do provedor escolhido (qualquer domínio, inclusive `localhost`) e para agir na aba indicada pelo usuário. Justificativa pronta. |
 | Código remoto | Nenhum. Todo o código está no pacote; nada é baixado e executado. |
 | Coleta de dados | Nenhuma pelos autores. A política de privacidade explica o fluxo. |

@@ -108,17 +108,16 @@ lib/storage.js     armazenamento
 
 ## Permissões
 
-**Obrigatórias:** `sidePanel`, `storage`, `unlimitedStorage`, `contextMenus`, `scripting`, `activeTab`, `tabs`, `clipboardWrite`, `declarativeNetRequestWithHostAccess` e `host_permissions: <all_urls>`.
+**Obrigatórias:** `sidePanel`, `storage`, `unlimitedStorage`, `contextMenus`, `scripting`, `activeTab`, `tabs`, `debugger`, `clipboardWrite`, `declarativeNetRequestWithHostAccess` e `host_permissions: <all_urls>`.
 
 **Opcionais** (a extensão instala sem elas e só as pede quando o recurso é usado):
 
 | Permissão | Quando é pedida | Se você recusar |
 |---|---|---|
-| `debugger` | Ao ligar o modo Navegar | O agente continua clicando, digitando e navegando por eventos de DOM; console, rede e captura de página inteira ficam indisponíveis |
 | `history` | Ao ligar "Permitir histórico e downloads" | A ferramenta de busca no histórico não aparece para o modelo |
 | `downloads` | Idem | A ferramenta de download não aparece para o modelo |
 
-O `debugger` é o que dá cliques e teclas confiáveis, captura de página inteira, console, rede, código-fonte e execução de JavaScript sem bloqueio de CSP — o mesmo mecanismo usado por Playwright e Puppeteer. Enquanto o agente trabalha, o Chrome mostra a barra "AI in Browser começou a depurar este navegador"; ela some ao terminar.
+O `debugger` é obrigatório porque o Chrome não o aceita como permissão opcional; ele só é anexado à aba durante uma tarefa do modo Navegar e pode ser desligado em Configurações → Agente. É o que dá cliques e teclas confiáveis, captura de página inteira, console, rede, código-fonte e execução de JavaScript sem bloqueio de CSP — o mesmo mecanismo usado por Playwright e Puppeteer. Enquanto o agente trabalha, o Chrome mostra a barra "AI in Browser começou a depurar este navegador"; ela some ao terminar.
 
 `<all_urls>` permite chamar qualquer URL base configurada (inclusive `localhost`) e ler ou agir na aba que você indicar. Nada é lido sem uma ação sua.
 

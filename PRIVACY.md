@@ -63,7 +63,7 @@ escolhido. Consulte a política de quem você usar, por exemplo
 | `clipboardWrite` | Copiar respostas e trechos de código |
 | `declarativeNetRequestWithHostAccess` | Remover o cabeçalho `Origin` apenas das requisições da própria extensão para os servidores de modelos locais ou personalizados que você configurou, para que aceitem a conexão sem configuração extra. Não altera requisições de sites |
 | `host_permissions: <all_urls>` | Falar com a API do provedor que você configurar (inclusive `localhost`) e atuar na aba que você indicar |
-| `debugger` *(opcional)* | Cliques e teclas confiáveis, captura de página inteira, console, rede e código-fonte. Pedida só ao ligar o modo Navegar; pode ser recusada |
+| `debugger` | Cliques e teclas confiáveis, captura de página inteira, console, rede e código-fonte durante tarefas do modo Navegar. Só é anexada à aba enquanto uma tarefa pedida por você roda, e é liberada ao terminar. Pode ser desligada em Configurações → Agente |
 | `history` *(opcional)* | Ferramenta de busca no histórico. Desligada por padrão |
 | `downloads` *(opcional)* | Ferramenta de download de arquivos. Desligada por padrão |
 

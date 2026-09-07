@@ -40,11 +40,11 @@
     "scripting",
     "activeTab",
     "tabs",
+    "debugger",
     "clipboardWrite",
     "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [
-    "debugger",
     "history",
     "downloads"
   ],

@@ -25,6 +25,7 @@ const state = {
   streaming: null,
   context: null,
   pickerFilter: 'all',
+  pickerSort: 'recent',
   pickerExpanded: new Set(),
   autoScroll: true,
   saveTimer: null,
@@ -1412,9 +1413,10 @@ function modelItemHtml(c, m, selected, fav) {
   if (m.context) meta.push(`<span>${P.formatContext(m.context)} ctx</span>`);
   if (m.promptPrice != null) meta.push(m.free ? `<span class="free">grátis</span>` : `<span class="price">${P.formatPrice(m.promptPrice)} / ${P.formatPrice(m.completionPrice)}</span>`);
   const vision = (m.modalities || []).includes('image') ? '<span class="tag vision">visão</span>' : '';
+  const novo = c.type === 'openrouter' && P.isNew(m.created) ? `<span class="tag new" title="lançado ${esc(P.formatAge(m.created))}">novo</span>` : '';
   return `<div class="model-item${selected ? ' selected' : ''}" data-conn="${esc(c.id)}" data-model="${esc(m.id)}" role="button" tabindex="0">
     <span class="badge" style="background:${b.color};color:${/^#(f|e)/i.test(b.color) ? '#111' : '#fff'}">${b.letter}</span>
-    <div class="mi-body"><div class="mi-name"><span>${esc(displayName(m))}</span>${vision}</div><div class="mi-id">${esc(m.id)}</div></div>
+    <div class="mi-body"><div class="mi-name"><span>${esc(displayName(m))}</span>${novo}${vision}</div><div class="mi-id">${esc(m.id)}${c.type === 'openrouter' && m.created ? ` · ${esc(P.formatAge(m.created))}` : ''}</div></div>
     <div class="mi-meta">${meta.join('')}</div>
     <button class="mi-star${fav ? ' on' : ''}" data-fav title="${fav ? 'Remover dos favoritos' : 'Favoritar'}"><svg><use href="#i-star"/></svg></button>
     ${selected ? '<svg class="mi-check"><use href="#i-check"/></svg>' : ''}
@@ -1442,11 +1444,23 @@ function groupHtml(c, models, { title, badge = true, cap = 60, key } = {}) {
   return html;
 }
 
+function sortModels(list, c) {
+  const s = state.pickerSort;
+  const arr = [...list];
+  if (s === 'name') return arr.sort((a, b) => displayName(a).localeCompare(displayName(b)));
+  if (s === 'price') return arr.sort((a, b) => (a.promptPrice ?? (c.local ? 0 : 1e9)) - (b.promptPrice ?? (c.local ? 0 : 1e9)) || displayName(a).localeCompare(displayName(b)));
+  if (c.type !== 'openrouter') return arr.sort((a, b) => displayName(a).localeCompare(displayName(b)));
+  return arr.sort((a, b) => (b.created || 0) - (a.created || 0) || displayName(a).localeCompare(displayName(b)));
+}
+
 function renderPicker() {
   const q = els.pickerSearch.value.trim().toLowerCase();
   const f = state.pickerFilter;
   const conns = visibleConnections();
-  const match = (m) => !q || m.id.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q);
+  // lotes (:batch) e apelidos (~…latest) só aparecem quando procurados
+  const interactive = (m) => /batch/.test(q) || /^~|latest/.test(q) ? true : !/:batch$/i.test(m.id) && !m.id.startsWith('~');
+  const match = (m) => interactive(m) && (!q || m.id.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q));
+  els.pickerSort.value = state.pickerSort;
   let html = '';
   let total = 0;
 
@@ -1464,14 +1478,14 @@ function renderPicker() {
   } else if (f === 'featured' || f === 'free') {
     for (const c of conns.filter((x) => x.type === 'openrouter')) {
       const list = state.models[c.id] || [];
-      const models = (f === 'featured' ? P.featuredFrom(list) : list.filter((m) => m.free)).filter(match);
+      const models = (f === 'featured' ? P.featuredFrom(list) : sortModels(list.filter((m) => m.free), c)).filter(match);
       html += groupHtml(c, models, { title: f === 'featured' ? 'Destaques' : 'Modelos gratuitos', key: f + ':' + c.id, cap: 200 });
       total += models.length;
     }
   } else if (f.startsWith('conn:')) {
     const c = conn(f.slice(5));
     if (c) {
-      const models = (state.models[c.id] || []).filter(match);
+      const models = sortModels((state.models[c.id] || []).filter(match), c);
       html += groupHtml(c, models, { key: 'conn:' + c.id, cap: q ? 200 : 80 });
       total += models.length;
     }
@@ -1491,7 +1505,7 @@ function renderPicker() {
       }
     }
     for (const c of conns) {
-      const models = (state.models[c.id] || []).filter(match);
+      const models = sortModels((state.models[c.id] || []).filter(match), c);
       total += models.length;
       if (q && !models.length) continue;
       html += groupHtml(c, models, { key: c.id, cap: q ? 200 : 40 });
@@ -1762,6 +1776,11 @@ function bindEvents() {
     updateHeader();
   });
   els.pickerSettings.addEventListener('click', openOptions);
+  els.pickerSort.addEventListener('change', () => {
+    state.pickerSort = els.pickerSort.value;
+    state.pickerExpanded.clear();
+    renderPicker();
+  });
 
   els.btnMenu.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1939,20 +1958,7 @@ function bindEvents() {
   });
 
   // modo navegar, esforço, voz, parar
-  els.btnBrowse.addEventListener('click', () => {
-    const turningOn = !state.settings.browseMode;
-    const ag = state.settings.agent || {};
-    // permissions.request precisa do gesto do clique: chamada antes de qualquer await
-    if (turningOn && S.HAS_CHROME && ag.useDebugger !== false && !ag.debuggerDeclined) {
-      PERM.request(['debugger']).then(async (ok) => {
-        if (ok) return;
-        state.settings.agent = { ...(state.settings.agent || {}), debuggerDeclined: true };
-        await saveSettings();
-        toast('Modo Navegar ativo sem o DevTools Protocol. Clicar, digitar e navegar continuam funcionando.', '', 5000);
-      });
-    }
-    toggleBrowseMode();
-  });
+  els.btnBrowse.addEventListener('click', () => toggleBrowseMode());
   els.btnEffort.addEventListener('click', (e) => {
     e.stopPropagation();
     renderEffortMenu();
@@ -2083,6 +2089,7 @@ async function init() {
     pickerStatus: $('#picker-status'),
     pickerRefresh: $('#picker-refresh'),
     pickerSettings: $('#picker-settings'),
+    pickerSort: $('#picker-sort'),
     setup: $('#setup'),
     setupOrKey: $('#setup-or-key'),
     setupOrSave: $('#setup-or-save'),

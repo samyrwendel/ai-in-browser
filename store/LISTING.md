@@ -51,7 +51,7 @@ SEGURANÇA EM PRIMEIRO LUGAR
 • Nunca digita senhas que você não forneceu e não resolve CAPTCHAs.
 • Lista de domínios bloqueados: o agente não age nos sites que você proibir.
 • A execução de JavaScript na página pode ser desligada.
-• As permissões sensíveis (DevTools Protocol, histórico, downloads) são opcionais e só são pedidas quando o recurso é usado.
+• Histórico e downloads são permissões opcionais, pedidas só quando o recurso é usado; o DevTools Protocol pode ser desligado nas configurações.
 
 PRIVACIDADE DE VERDADE
 Não existe servidor do AI in Browser. Suas chaves ficam apenas no seu navegador e as mensagens vão exclusivamente para o provedor que você configurou. Sem telemetria, sem analytics, sem conta para criar. Com Ollama ou LM Studio, nada sai do seu computador.
@@ -85,7 +85,7 @@ Assistente de IA no navegador: conversar sobre a página aberta e, quando o usu�
 | `clipboardWrite` | Copiar respostas e blocos de código para a área de transferência quando o usuário clica em copiar. |
 | `declarativeNetRequestWithHostAccess` | Uma regra dinâmica que remove o cabeçalho Origin somente das requisições feitas pela própria extensão às URLs base de servidores locais ou personalizados configurados pelo usuário (por exemplo, um Ollama em http://localhost:11434). Sem isso esses servidores respondem 403 e o usuário precisaria reconfigurar o servidor. A regra é limitada ao iniciador da extensão e ao tipo xmlhttprequest; não bloqueia nem modifica requisições de páginas web. |
 | `host_permissions` (`<all_urls>`) | Duas funções: (1) enviar as mensagens para a API do provedor que o próprio usuário configurar, que pode estar em qualquer domínio, inclusive um servidor local como http://localhost:11434; (2) ler e agir na aba que o usuário indicar, já que o usuário pode pedir isso em qualquer site. A extensão não acessa páginas em segundo plano: só age após uma ação explícita do usuário. |
-| `debugger` (opcional) | Executar cliques e digitação como eventos confiáveis pelo Chrome DevTools Protocol, capturar a página inteira e ler console, requisições de rede e código-fonte quando o usuário solicita uma tarefa no modo Navegar. É uma permissão opcional, solicitada apenas quando o usuário ativa o modo Navegar, e o recurso funciona de forma reduzida se ele recusar. |
+| `debugger` | Executar cliques e digitação como eventos confiáveis pelo Chrome DevTools Protocol, capturar a página inteira e ler console, requisições de rede e código-fonte quando o usuário solicita uma tarefa no modo Navegar. O depurador só é anexado à aba de trabalho durante uma tarefa iniciada pelo usuário e é desanexado ao terminar; o Chrome exibe a barra de depuração nesse período. O usuário pode desligar o uso do DevTools Protocol nas configurações, e o agente passa a usar eventos de DOM. |
 | `history` (opcional) | Ferramenta de busca no histórico, usada apenas se o usuário ligar essa opção nas configurações. |
 | `downloads` (opcional) | Baixar um arquivo quando o usuário pede isso ao agente. Opcional e desligada por padrão. |
 | Código remoto | Não. Todo o código executado está no pacote. A extensão não carrega nem executa scripts hospedados remotamente. No modo Navegar, o usuário pode autorizar o agente a rodar JavaScript na página aberta (ferramenta `evaluate_js`), recurso que pode ser desativado nas configurações. |

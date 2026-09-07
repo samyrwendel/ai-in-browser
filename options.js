@@ -291,19 +291,7 @@ function bindGeneral() {
   const agDbg = $('#agent-debugger');
   agDbg.checked = ag.useDebugger !== false;
   agDbg.addEventListener('change', () => {
-    if (agDbg.checked) {
-      // gesto do usuário: pede a permissão opcional "debugger"
-      PERM.request(['debugger']).then(async (ok) => {
-        ag.useDebugger = ok;
-        ag.debuggerDeclined = !ok;
-        agDbg.checked = ok;
-        await save({ immediate: true });
-        if (!ok) toast('Permissão negada. O agente continua funcionando sem o DevTools Protocol.', 'err', 5000);
-      });
-      return;
-    }
-    ag.useDebugger = false;
-    PERM.remove(['debugger']);
+    ag.useDebugger = agDbg.checked;
     save();
   });
   const agJs = $('#agent-js');
@@ -547,13 +535,14 @@ function tierDots(t) {
 function candidateRow(c, cfg, autoPick, roleId) {
   const pinned = cfg.mode === 'pinned' && cfg.connectionId === c.connectionId && cfg.modelId === c.modelId;
   const isAuto = cfg.mode === 'auto' && autoPick && autoPick.connectionId === c.connectionId && autoPick.modelId === c.modelId;
-  const labels = [...(c.labels || []), ...(c.isMain ? ['principal'] : [])].map((l) => `<span class="lbl ${l.replace(/\s.*/, '')}">${esc(l)}</span>`).join('');
+  const labels = [...(c.created && P.isNew(c.created) ? ['novo'] : []), ...(c.labels || []), ...(c.isMain ? ['principal'] : [])].map((l) => `<span class="lbl ${l.replace(/\s.*/, '')}">${esc(l)}</span>`).join('');
   const state = pinned ? '<span class="use on">em uso</span>' : isAuto ? '<span class="use auto">automático</span>' : `<button type="button" class="use" data-use="${esc(c.connectionId)}|${esc(c.modelId)}">Usar</button>`;
   return `<tr class="${pinned || isAuto ? 'cur' : ''}" title="${esc(c.why.join(' · '))}">
     <td class="c-name"><b>${esc(c.name)}</b><span>${esc(c.connectionName)}</span>${labels}</td>
     <td class="c-tier">${tierDots(c.tier)}</td>
     <td class="c-price">${esc(R.formatCandidatePrice(c))}</td>
     <td class="c-ctx">${c.cap.context ? esc(P.formatContext(c.cap.context)) : '—'}</td>
+    <td class="c-age" title="${c.created ? new Date(c.created * 1000).toLocaleDateString('pt-BR') : ''}">${c.created ? esc(P.formatAge(c.created)) : '—'}</td>
     <td class="c-use">${state}</td>
   </tr>`;
 }
@@ -576,7 +565,7 @@ function renderRoles() {
     const search = cands.length > 6 ? `<div class="cmp-search"><input type="search" data-search placeholder="Buscar por nome, provedor ou id… ex.: glm 5.3, openrouter, claude" value="${esc(rolesQuery[role.id] || '')}" autocomplete="off"><span class="tiny">${q ? `${filtered.length} de ${cands.length}` : `${cands.length} modelos`}</span></div>` : '';
     const table = cands.length
       ? `${search}${filtered.length ? `<div class="cmp-wrap"><table class="cmp">
-          <thead><tr><th>Modelo</th><th>Qualidade</th><th>Preço (1M entrada / saída)</th><th>Contexto</th><th></th></tr></thead>
+          <thead><tr><th>Modelo</th><th>Qualidade</th><th>Preço (1M entrada / saída)</th><th>Contexto</th><th>Lançado</th><th></th></tr></thead>
           <tbody>${shown.map((c) => candidateRow(c, cfg, autoPick, role.id)).join('')}</tbody>
         </table></div>` : `<div class="role-auto">Nenhum modelo corresponde a "${esc(rolesQuery[role.id] || '')}".</div>`}
         ${!q && cands.length > 6 ? `<button type="button" class="cmp-more" data-more>${expanded ? 'Mostrar menos' : `Mostrar todos (${cands.length})`}</button>` : ''}

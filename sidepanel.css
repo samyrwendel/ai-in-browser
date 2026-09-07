@@ -614,3 +614,6 @@
 
 .composer.drag { border-color: var(--accent); background: rgba(var(--accent-rgb), .06); }
 .attach-menu button svg { width: 16px; height: 16px; }
+
+.agent-ask .agent-answer { margin-top: 7px; padding-top: 7px; border-top: 1px solid rgba(var(--accent-rgb), .3); color: var(--text-2); font-size: 12.5px; }
+.agent-ask .agent-answer b { color: var(--text); font-weight: 600; }

@@ -455,7 +455,11 @@ function agentRunHtml(msg) {
       </div>`;
     })
     .join('');
-  const ask = msg.question ? `<div class="agent-ask${msg.questionAnswered ? ' answered' : ''}"><span class="q-ico">❓</span><div>${esc(msg.question)}</div></div>` : '';
+  const ask = msg.question
+    ? `<div class="agent-ask${msg.questionAnswered ? ' answered' : ''}"><span class="q-ico">❓</span><div><div>${esc(msg.question)}</div>${
+        msg.answer ? `<div class="agent-answer"><b>Você:</b> ${esc(msg.answer)}</div>` : ''
+      }</div></div>`
+    : '';
   const tag = !msg.pending && msg.steps?.length ? `<div class="agent-summary-tag"><b>${msg.steps.length} ${msg.steps.length === 1 ? 'ação' : 'ações'}</b>${msg.agentMode === 'json' ? ' · protocolo JSON' : ''}${msg.status === 'aborted' ? ' · interrompido' : msg.status === 'partial' ? ' · incompleto' : ''}</div>` : '';
   return `<div class="agent-steps">${steps}</div>${ask}${tag}`;
 }
@@ -752,15 +756,15 @@ async function send(text, ctxOverride) {
   text = (text ?? '').trim();
   if (state.agentWaiting && state.agent) {
     if (!text) return;
-    const um = { id: uid(), role: 'user', content: text, ts: Date.now() };
-    state.chat.messages.push(um);
-    appendMessage(um);
+    // a resposta entra no próprio bloco da pergunta, mantendo a ordem da conversa
     els.input.value = '';
     autoResize();
     state.agentWaiting = false;
     state.agent.msg.questionAnswered = true;
+    state.agent.msg.answer = text;
     updateAssistantNode(state.agent.node, state.agent.msg);
     renderContextBar();
+    scrollToBottom(true);
     state.agent.runner.answer(text);
     setSendState();
     return;

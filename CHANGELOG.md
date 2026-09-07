@@ -53,6 +53,10 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   presença de chave.
 
 ### Corrigido
+- O ditado por voz falhava silenciosamente no painel lateral porque o Chrome
+  não exibe o pedido de microfone ali. Agora a extensão solicita a permissão
+  opcional `audioCapture` no clique do microfone, e há um botão "Testar
+  microfone" em Configurações → Comportamento para conceder e verificar.
 - No modo Navegar, imagens anexadas pelo usuário eram ignoradas: o agente
   respondia sobre a aba aberta em vez do anexo. Agora o anexo é descrito antes
   da tarefa (pelo próprio modelo, se enxergar, ou pelo ajudante de visão) e

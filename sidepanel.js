@@ -1164,8 +1164,7 @@ function stopMic() {
   els.btnMic.classList.remove('listening');
 }
 
-function toggleMic() {
-  if (state.rec) return stopMic();
+function startDictation() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return toast('Reconhecimento de voz indisponível neste navegador.', 'err');
   const rec = new SR();
@@ -1186,7 +1185,7 @@ function toggleMic() {
     setSendState();
   };
   rec.onerror = (e) => {
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Permita o acesso ao microfone para ditar (ícone de cadeado → Microfone).', 'err', 5000);
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('O Chrome bloqueou o microfone. Abra as configurações da extensão e use "Testar microfone" para conceder a permissão.', 'err', 7000);
     else if (e.error !== 'aborted' && e.error !== 'no-speech') toast('Erro no reconhecimento de voz: ' + e.error, 'err');
     stopMic();
   };
@@ -2062,7 +2061,18 @@ function bindEvents() {
   document.addEventListener('click', (e) => {
     if (!els.effortMenu.classList.contains('hidden') && !e.target.closest('#effort-menu') && !e.target.closest('#btn-effort')) els.effortMenu.classList.add('hidden');
   });
-  els.btnMic.addEventListener('click', toggleMic);
+  els.btnMic.addEventListener('click', () => {
+    if (state.rec) return stopMic();
+    // permissions.request precisa do gesto do clique: chamada antes de qualquer await
+    if (S.HAS_CHROME && chrome.permissions) {
+      PERM.request(['audioCapture']).then((ok) => {
+        if (ok) startDictation();
+        else toast('Sem permissão de microfone o ditado não funciona. Você pode conceder depois em Configurações.', 'err', 5000);
+      });
+      return;
+    }
+    startDictation();
+  });
   els.btnCoop.addEventListener('click', async (e) => {
     e.stopPropagation();
     if (!els.coopMenu.classList.contains('hidden')) return els.coopMenu.classList.add('hidden');

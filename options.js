@@ -357,6 +357,25 @@ function bindGeneral() {
     save();
   });
 
+  const micBtn = $('#mic-test');
+  if (micBtn) {
+    micBtn.addEventListener('click', async () => {
+      micBtn.disabled = true;
+      const prev = micBtn.textContent;
+      micBtn.textContent = 'Testando…';
+      try {
+        if (S.HAS_CHROME && chrome.permissions) await PERM.request(['audioCapture']);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((t) => t.stop());
+        toast('Microfone liberado. O ditado por voz já funciona no painel.', 'ok', 4000);
+      } catch (e) {
+        toast('Não foi possível acessar o microfone: ' + (e?.message || e), 'err', 6000);
+      }
+      micBtn.disabled = false;
+      micBtn.textContent = prev;
+    });
+  }
+
   const un = $('#user-name');
   un.value = settings.userName || '';
   un.addEventListener('input', () => {

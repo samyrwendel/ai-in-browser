@@ -45,6 +45,7 @@
     "declarativeNetRequestWithHostAccess"
   ],
   "optional_permissions": [
+    "audioCapture",
     "history",
     "downloads"
   ],

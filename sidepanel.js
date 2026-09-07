@@ -474,7 +474,7 @@ function agentRunHtml(msg) {
         msg.answer ? `<div class="agent-answer"><b>Você:</b> ${esc(msg.answer)}</div>` : ''
       }</div></div>`
     : '';
-  const tag = !msg.pending && msg.steps?.length ? `<div class="agent-summary-tag"><b>${msg.steps.length} ${msg.steps.length === 1 ? 'ação' : 'ações'}</b>${msg.agentMode === 'json' ? ' · protocolo JSON' : ''}${msg.status === 'aborted' ? ' · interrompido' : msg.status === 'partial' ? ' · incompleto' : ''}</div>` : '';
+  const tag = !msg.pending && msg.steps?.length ? `<div class="agent-summary-tag"><b>${msg.steps.length} ${msg.steps.length === 1 ? 'ação' : 'ações'}</b>${msg.agentMode === 'json' ? ' · protocolo JSON' : ''}${msg.status === 'aborted' ? ' · interrompido' : msg.status === 'partial' ? ' · incompleto' : ''}${msg.workingTab?.title ? ` · aba: <span title="${esc(msg.workingTab.url || '')}">${esc(msg.workingTab.title.slice(0, 48))}</span>` : ''}</div>` : '';
   return `<div class="agent-steps">${steps}</div>${ask}${tag}`;
 }
 
@@ -965,7 +965,13 @@ async function runAgentTask(text, ctx, userMsg) {
         updateAssistantNode(node, msg);
         scrollToBottom();
       } else if (ev.type === 'status') {
-        setAgentStatus(ev.text);
+        const tab = ev.tab;
+        setAgentStatus(tab?.title ? `${ev.text} · aba: ${tab.title.slice(0, 40)}` : ev.text);
+        if (tab?.note && !msg.tabNoteShown) {
+          msg.tabNoteShown = true;
+          msg.workingTab = { title: tab.title, url: tab.url };
+          toast(`A aba ativa não é uma página web. O agente está usando a última página aberta: ${tab.title || tab.url}`, '', 6000);
+        } else if (tab?.title && !msg.workingTab) msg.workingTab = { title: tab.title, url: tab.url };
       } else if (ev.type === 'helper') {
         if (!msg.helpers.some((h) => h.role === ev.role && h.modelId === ev.modelId)) {
           msg.helpers.push({ role: ev.role, connectionId: ev.connectionId, modelId: ev.modelId, name: ev.name, source: visionHelper?.source || 'auto' });

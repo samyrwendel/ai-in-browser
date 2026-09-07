@@ -40,6 +40,11 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 - A resposta do usuário a uma pergunta do agente aparece dentro do bloco da
   pergunta, preservando a ordem da conversa.
 - Ícone 128×128 da loja com margem, conforme as diretrizes.
+- Quando a aba ativa não é uma página web (configurações da extensão, aba
+  em branco, páginas internas), o agente passa a usar a última página web
+  aberta **avisando** o modelo e o usuário, em vez de descrevê-la como se
+  fosse a tela atual. A aba de trabalho aparece na barra de status e no
+  resumo da tarefa.
 
 ## [1.0.0] — 2026-09-06
 

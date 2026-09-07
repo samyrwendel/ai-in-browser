@@ -84,21 +84,29 @@ Assistente de IA no navegador: conversar sobre a página aberta e, quando o usu�
 | `scripting` | Injetar o script que lê o texto e mapeia os elementos interativos da página e que executa as ações solicitadas pelo usuário no modo Navegar. |
 | `tabs` | Ler título e URL da aba de trabalho e abrir, alternar ou fechar abas durante uma tarefa que o usuário pediu ao agente. |
 | `clipboardWrite` | Copiar respostas e blocos de código para a área de transferência quando o usuário clica em copiar. |
-| `declarativeNetRequestWithHostAccess` | Uma regra dinâmica que remove o cabeçalho Origin somente das requisições feitas pela própria extensão às URLs base de servidores locais ou personalizados configurados pelo usuário (por exemplo, um Ollama em http://localhost:11434). Sem isso esses servidores respondem 403 e o usuário precisaria reconfigurar o servidor. A regra é limitada ao iniciador da extensão e ao tipo xmlhttprequest; não bloqueia nem modifica requisições de páginas web. |
+| `declarativeNetRequestWithHostAccess` | Uma única regra dinâmica que remove o cabeçalho Origin apenas das requisições que a própria extensão faz às URLs base de servidores de modelos locais ou personalizados que o usuário configurou, como um Ollama em http://localhost:11434. Esses servidores recusam com HTTP 403 qualquer requisição de navegador cuja origem seja chrome-extension://, e sem essa regra o usuário precisaria reconfigurar o servidor dele. A regra é limitada ao iniciador da extensão e ao tipo xmlhttprequest, e nunca se aplica aos provedores oficiais (OpenRouter, OpenAI, Anthropic). Ela não bloqueia, não redireciona e não modifica nenhuma requisição feita por páginas web: sites visitados pelo usuário não são afetados de forma alguma. |
 | `host_permissions` (`<all_urls>`) | Duas funções: (1) enviar as mensagens para a API do provedor que o próprio usuário configurar, que pode estar em qualquer domínio, inclusive um servidor local como http://localhost:11434; (2) ler e agir na aba que o usuário indicar, já que o usuário pode pedir isso em qualquer site. A extensão não acessa páginas em segundo plano: só age após uma ação explícita do usuário. |
 | `debugger` | Executar cliques e digitação como eventos confiáveis pelo Chrome DevTools Protocol, capturar a página inteira e ler console, requisições de rede e código-fonte quando o usuário solicita uma tarefa no modo Navegar. O depurador só é anexado à aba de trabalho durante uma tarefa iniciada pelo usuário e é desanexado ao terminar; o Chrome exibe a barra de depuração nesse período. O usuário pode desligar o uso do DevTools Protocol nas configurações, e o agente passa a usar eventos de DOM. |
-| `audioCapture` (opcional) | Ditado por voz no campo de mensagem. Solicitada apenas quando o usuário clica no botão de microfone; o áudio é processado pelo reconhecimento de voz do próprio navegador e não é enviado a nenhum provedor. |
+| `audioCapture` (opcional) | Ditado por voz no campo de mensagem. É uma permissão opcional: não é pedida na instalação e só é solicitada quando o usuário clica no botão de microfone pela primeira vez. O áudio é processado pelo reconhecimento de voz do próprio navegador e convertido em texto localmente na interface; a extensão não grava, não armazena e não envia áudio a nenhum servidor. Apenas o texto transcrito aparece no campo, e ele só sai do dispositivo se o usuário enviar a mensagem ao provedor de IA que ele mesmo configurou. |
 | `history` (opcional) | Ferramenta de busca no histórico, usada apenas se o usuário ligar essa opção nas configurações. |
 | `downloads` (opcional) | Baixar um arquivo quando o usuário pede isso ao agente. Opcional e desligada por padrão. |
 | Código remoto | Não. Todo o código executado está no pacote. A extensão não carrega nem executa scripts hospedados remotamente. No modo Navegar, o usuário pode autorizar o agente a rodar JavaScript na página aberta (ferramenta `evaluate_js`), recurso que pode ser desativado nas configurações. |
 
+## Código remoto
+
+Responda **Não**. Todo o JavaScript executado pela extensão está no pacote: não há tags `<script>` externas, nem módulos remotos, nem avaliação de strings no contexto da extensão.
+
+Há um ponto que vale declarar por escrito na justificativa das permissões de host, para não surpreender o revisor: a ferramenta `evaluate_js` do modo Navegar passa uma expressão ao motor de JavaScript **da página aberta**, a pedido do usuário, do mesmo jeito que ele faria no console do DevTools. Isso acontece no contexto da página, nunca no da extensão, e pode ser desativado em Configurações → Agente.
+
 ## Uso de dados (Data usage / Privacy practices)
 
-Declare no formulário:
+Marque exatamente três caixas:
 
-- **Informações de autenticação** — sim: as chaves de API digitadas pelo usuário ficam no armazenamento local do navegador e são enviadas apenas ao provedor escolhido por ele.
-- **Conteúdo do site** — sim: o conteúdo da página é enviado ao provedor de IA escolhido pelo usuário quando ele anexa a página, seleciona um trecho ou usa o modo Navegar.
-- **Comunicações pessoais, localização, atividade financeira, saúde, atividade do usuário, histórico de navegação** — não coletados pela extensão.
+- **Informações de autenticação** — as chaves de API que o usuário cadastra ficam no armazenamento local e são enviadas apenas ao provedor que ele escolheu.
+- **Conteúdo do site** — o conteúdo da página vai ao provedor de IA quando o usuário anexa a página, seleciona um trecho ou usa o modo Navegar.
+- **Histórico da Web** — só quando o usuário liga a permissão opcional de histórico; nesse caso a ferramenta de busca no histórico pode enviar títulos e URLs ao modelo. Está desligada por padrão.
+
+Não marque: informações de identificação pessoal, saúde, financeiras, comunicações pessoais, localização e atividade do usuário. A extensão não coleta nada disso; o que passa é o conteúdo da página que o próprio usuário mandou analisar.
 
 Marque as três declarações finais:
 1. Não vendo nem transfiro dados a terceiros fora dos casos de uso aprovados.

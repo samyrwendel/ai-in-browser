@@ -77,7 +77,8 @@ Assistente de IA no navegador: conversar sobre a página aberta e, quando o usu�
 | Campo no painel | Texto para colar |
 |---|---|
 | `sidePanel` | Exibir a interface do assistente no painel lateral do navegador. |
-| `storage` / `unlimitedStorage` | Salvar localmente as preferências, as chaves de API do usuário e o histórico de conversas. Nada é enviado a servidores da extensão. |
+| `storage` | Salvar localmente as preferências do usuário, as chaves de API que ele cadastrar e o histórico de conversas. Nada é enviado a servidores da extensão. |
+| `unlimitedStorage` | O histórico de conversas fica inteiramente no dispositivo do usuário, em chrome.storage.local, e pode passar da cota padrão de 10 MB. A extensão guarda até 200 conversas, e cada mensagem pode conter imagens que o usuário anexou (até 6 por mensagem, cerca de 250 a 700 KB cada em base64), arquivos de texto de até 200 mil caracteres e trechos da página que ele mandou analisar. Some-se a isso o cache do catálogo de modelos do provedor, que sozinho ocupa cerca de 280 KB. Sem unlimitedStorage, a gravação passa a falhar e o usuário perde conversas antigas sem aviso. Nada disso é enviado a servidores da extensão: o armazenamento é só local, e o usuário pode apagar tudo em Configurações → Dados. |
 | `contextMenus` | Oferecer os itens "Perguntar ao AI in Browser" sobre o texto selecionado e "Resumir esta página". |
 | `activeTab` | Acessar a aba atual apenas quando o usuário aciona a extensão, para ler o conteúdo que ele quer discutir. |
 | `scripting` | Injetar o script que lê o texto e mapeia os elementos interativos da página e que executa as ações solicitadas pelo usuário no modo Navegar. |

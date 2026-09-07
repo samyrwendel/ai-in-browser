@@ -56,7 +56,8 @@ escolhido. Consulte a política de quem você usar, por exemplo
 | Permissão | Para quê |
 |---|---|
 | `sidePanel` | Mostrar o chat no painel lateral |
-| `storage`, `unlimitedStorage` | Salvar preferências, chaves e conversas localmente |
+| `storage` | Salvar preferências, chaves e conversas localmente |
+| `unlimitedStorage` | O histórico com imagens e arquivos anexados passa da cota padrão de 10 MB; sem isso você perderia conversas sem aviso |
 | `contextMenus` | Itens "Perguntar ao AI in Browser" e "Resumir esta página" |
 | `activeTab`, `scripting` | Ler o conteúdo da aba e executar as ações do agente, sempre a partir de uma ação sua |
 | `tabs` | Ver título/URL da aba de trabalho e abrir, alternar ou fechar abas durante uma tarefa |

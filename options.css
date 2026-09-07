@@ -168,3 +168,31 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .role-sugg button:hover { background: var(--surface-3); color: var(--text); border-color: rgba(var(--accent-rgb), .45); }
 .role-sugg button b { color: var(--text); font-weight: 600; }
 .role-sugg button.active { background: rgba(var(--accent-rgb), .16); border-color: rgba(var(--accent-rgb), .45); color: var(--text); }
+
+/* comparação de candidatos */
+.role-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.role-pref { display: flex; align-items: center; gap: 8px; }
+.segmented.small button { padding: 4px 10px; font-size: 12px; }
+.cmp-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+.cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cmp th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); padding: 8px 12px; background: var(--surface); white-space: nowrap; font-weight: 600; }
+.cmp td { padding: 9px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+.cmp tr.cur td { background: rgba(var(--accent-rgb), .10); }
+.cmp .c-name b { display: block; font-weight: 600; }
+.cmp .c-name > span { display: block; font-size: 11.5px; color: var(--text-3); }
+.cmp .lbl { display: inline-block; margin: 4px 4px 0 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 5px; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+.cmp .lbl.melhor { background: rgba(52,211,153,.14); color: var(--success); border-color: rgba(52,211,153,.35); }
+.cmp .lbl.local, .cmp .lbl.grátis { background: rgba(var(--accent-2-rgb), .12); color: var(--accent-2); border-color: rgba(var(--accent-2-rgb), .35); }
+.cmp .lbl.principal { background: rgba(var(--accent-rgb), .16); color: var(--accent); border-color: rgba(var(--accent-rgb), .4); }
+.cmp .tier { font-size: 13px; letter-spacing: 1px; color: var(--text-3); white-space: nowrap; }
+.cmp .tier.t3 { color: var(--success); }
+.cmp .tier.t2 { color: var(--warning); }
+.cmp .c-price, .cmp .c-ctx { white-space: nowrap; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.cmp .c-use { text-align: right; white-space: nowrap; }
+.cmp .use { font-size: 12px; padding: 4px 11px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }
+.cmp button.use:hover { background: var(--surface-3); border-color: rgba(var(--accent-rgb), .45); }
+.cmp .use.on { background: rgba(var(--accent-rgb), .18); border-color: rgba(var(--accent-rgb), .45); color: var(--text); }
+.cmp .use.auto { background: transparent; color: var(--text-3); border-color: transparent; }
+.cmp-more { display: block; width: 100%; margin-top: 6px; padding: 7px; text-align: center; font-size: 12.5px; color: var(--accent); border-radius: 8px; }
+.cmp-more:hover { background: var(--surface-2); }
+@media (max-width: 820px) { .cmp th:nth-child(4), .cmp td:nth-child(4) { display: none; } }

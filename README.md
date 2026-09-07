@@ -80,7 +80,7 @@ Um modelo local pode não ter visão; um modelo barato pode não ter tool callin
 | Tarefas auxiliares | Títulos de conversa e resumos | Só modelos locais ou gratuitos no automático |
 | Reserva | O principal falha por limite, erro ou rede | Outro modelo responde e a mensagem mostra "Reserva" |
 
-Em *Configurações → Cooperação* cada papel pode ficar em **Automático** (a extensão ranqueia os modelos ativos: locais e gratuitos primeiro, depois favoritos e destaques, e explica a escolha), **Fixo** (sempre o modelo que você escolher, com uma lista de sugeridos) ou **Desligado**. O principal continua respondendo sempre que ele mesmo dá conta, e cada mensagem exibe quem cooperou.
+Em *Configurações → Cooperação* cada papel pode ficar em **Automático**, **Fixo** ou **Desligado**, com uma prioridade entre **qualidade**, **equilíbrio** e **preço**. Uma tabela compara os modelos ativos para aquela habilidade com qualidade conhecida, preço por milhão de tokens e contexto, marca o melhor em qualidade e em preço, e explica o que o automático escolheria; um clique fixa qualquer linha. O principal continua respondendo sempre que ele mesmo dá conta, e cada mensagem exibe quem cooperou.
 
 ## Como funciona
 

@@ -15,8 +15,12 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   cabe no contexto), **tarefas auxiliares** (títulos de conversa, só com
   modelos locais ou gratuitos) e **reserva** (responde quando o principal
   falha). Cada papel pode ficar em automático, fixo num modelo ou desligado,
-  em Configurações → Cooperação, com sugestões ranqueadas e a explicação do
-  que o automático escolheria. As mensagens mostram quem cooperou.
+  em Configurações → Cooperação. Cada papel tem uma prioridade (qualidade,
+  equilíbrio ou preço) e uma tabela comparativa dos modelos ativos com
+  qualidade conhecida para a habilidade, preço por milhão de tokens e
+  contexto, além da explicação do que o automático escolheria. Roteadores
+  como o Auto Router ficam fora das sugestões. As mensagens mostram quem
+  cooperou.
 
 ### Alterado
 - Provedores começam **desativados** e passam a ativos quando você cola uma

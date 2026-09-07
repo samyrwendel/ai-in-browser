@@ -530,10 +530,25 @@ async function loadRoleModels(force = false) {
   status.textContent = `${total} modelos em ${active.length} ${active.length === 1 ? 'conexão ativa' : 'conexões ativas'}`;
 }
 
-function roleOption(c, cfg, i) {
-  const badges = R.capabilityBadges(c.cap).join(' · ');
-  const sel = cfg.connectionId === c.connectionId && cfg.modelId === c.modelId ? ' selected' : '';
-  return `<option value="${esc(c.connectionId)}|${esc(c.modelId)}"${sel}>${i < 3 ? '★ ' : ''}${esc(c.name)} · ${esc(c.connectionName)}${badges ? ' — ' + esc(badges) : ''}</option>`;
+const rolesExpanded = new Set();
+
+function tierDots(t) {
+  const title = t >= 3 ? 'referência na habilidade' : t === 2 ? 'boa qualidade' : 'funciona, sem destaque';
+  return `<span class="tier t${t}" title="${title}">${'●'.repeat(t)}${'○'.repeat(3 - t)}</span>`;
+}
+
+function candidateRow(c, cfg, autoPick, roleId) {
+  const pinned = cfg.mode === 'pinned' && cfg.connectionId === c.connectionId && cfg.modelId === c.modelId;
+  const isAuto = cfg.mode === 'auto' && autoPick && autoPick.connectionId === c.connectionId && autoPick.modelId === c.modelId;
+  const labels = [...(c.labels || []), ...(c.isMain ? ['principal'] : [])].map((l) => `<span class="lbl ${l.replace(/\s.*/, '')}">${esc(l)}</span>`).join('');
+  const state = pinned ? '<span class="use on">em uso</span>' : isAuto ? '<span class="use auto">automático</span>' : `<button type="button" class="use" data-use="${esc(c.connectionId)}|${esc(c.modelId)}">Usar</button>`;
+  return `<tr class="${pinned || isAuto ? 'cur' : ''}" title="${esc(c.why.join(' · '))}">
+    <td class="c-name"><b>${esc(c.name)}</b><span>${esc(c.connectionName)}</span>${labels}</td>
+    <td class="c-tier">${tierDots(c.tier)}</td>
+    <td class="c-price">${esc(R.formatCandidatePrice(c))}</td>
+    <td class="c-ctx">${c.cap.context ? esc(P.formatContext(c.cap.context)) : '—'}</td>
+    <td class="c-use">${state}</td>
+  </tr>`;
 }
 
 function renderRoles() {
@@ -541,19 +556,21 @@ function renderRoles() {
   const main = settings.current;
   list.innerHTML = R.ROLES.map((role) => {
     const cfg = { ...R.DEFAULT_ROLES[role.id], ...(settings.roles?.[role.id] || {}) };
-    const cands = R.candidates(role.id, settings, modelsByConn, main);
+    const cands = R.candidates(role.id, settings, modelsByConn, main, cfg.prefer);
     const auto = R.explainAuto(role.id, settings, modelsByConn, main);
+    const autoPick = R.resolveRole(role.id, { ...settings, roles: { ...(settings.roles || {}), [role.id]: { ...cfg, mode: 'auto' } } }, modelsByConn, main);
+    const expanded = rolesExpanded.has(role.id);
+    const shown = expanded ? cands : cands.slice(0, 6);
     const pinnedKnown = cands.some((c) => c.connectionId === cfg.connectionId && c.modelId === cfg.modelId);
-    let options = cands.map((c, i) => roleOption(c, cfg, i)).join('');
-    if (cfg.mode === 'pinned' && cfg.connectionId && cfg.modelId && !pinnedKnown) {
-      options = `<option value="${esc(cfg.connectionId)}|${esc(cfg.modelId)}" selected>${esc(cfg.modelId)} · ${esc(cfg.connectionId)} (fora da lista atual)</option>` + options;
-    }
-    if (!options) options = '<option value="">nenhum modelo ativo tem essa habilidade</option>';
-    const sugg = cands
-      .filter((c) => !(c.connectionId === main.connectionId && c.modelId === main.modelId))
-      .slice(0, 3)
-      .map((c) => `<button type="button" data-suggest="${esc(c.connectionId)}|${esc(c.modelId)}" class="${cfg.mode === 'pinned' && cfg.connectionId === c.connectionId && cfg.modelId === c.modelId ? 'active' : ''}" title="${esc(c.why.join(', '))}"><b>${esc(c.name)}</b> · ${esc(c.connectionName)}</button>`)
-      .join('');
+    const pinnedNote = cfg.mode === 'pinned' && cfg.modelId && !pinnedKnown ? `<div class="role-auto err">Fixado em <b>${esc(cfg.modelId)}</b> (${esc(cfg.connectionId)}), que não está na lista atual. Ative o provedor ou escolha outro abaixo.</div>` : '';
+    const prefs = R.PREFERENCES.map((pr) => `<button data-prefer="${pr.id}" class="${cfg.prefer === pr.id ? 'active' : ''}" title="${esc(pr.hint)}">${esc(pr.label)}</button>`).join('');
+    const table = cands.length
+      ? `<div class="cmp-wrap"><table class="cmp">
+          <thead><tr><th>Modelo</th><th>Qualidade</th><th>Preço (1M entrada / saída)</th><th>Contexto</th><th></th></tr></thead>
+          <tbody>${shown.map((c) => candidateRow(c, cfg, autoPick, role.id)).join('')}</tbody>
+        </table></div>
+        ${cands.length > 6 ? `<button type="button" class="cmp-more" data-more>${expanded ? 'Mostrar menos' : `Mostrar todos (${cands.length})`}</button>` : ''}`
+      : '<div class="role-auto err">Nenhum modelo ativo tem essa habilidade. Ative um provedor em Conexões.</div>';
     return `<div class="role ${cfg.mode}" data-role="${role.id}">
       <div class="role-head">
         <span class="role-ico">${role.icon}</span>
@@ -564,9 +581,13 @@ function renderRoles() {
           <button data-mode="off" class="${cfg.mode === 'off' ? 'active' : ''}">Desligado</button>
         </div>
       </div>
-      ${cfg.mode === 'pinned' ? `<div class="role-pick"><select class="input" data-pick>${options}</select></div>` : ''}
-      ${cfg.mode !== 'off' ? `<div class="role-auto${auto.ok ? '' : ' err'}">No automático: <b>${esc(auto.text)}</b></div>` : '<div class="role-auto">Sem cooperação: o principal tenta sozinho.</div>'}
-      ${sugg && cfg.mode !== 'off' ? `<div class="role-sugg"><span class="tiny" style="align-self:center">Sugeridos:</span>${sugg}</div>` : ''}
+      ${cfg.mode === 'off' ? '<div class="role-auto">Sem cooperação: o principal tenta sozinho.</div>' : `
+      <div class="role-bar">
+        <div class="role-pref"><span class="tiny">Priorizar</span><div class="segmented small">${prefs}</div></div>
+        <div class="role-auto${auto.ok ? '' : ' err'}">No automático: <b>${esc(auto.text)}</b></div>
+      </div>
+      ${pinnedNote}
+      ${table}`}
     </div>`;
   }).join('');
 }
@@ -580,33 +601,33 @@ function bindRoles() {
     settings.roles = settings.roles || {};
     const cfg = { ...R.DEFAULT_ROLES[id], ...(settings.roles[id] || {}) };
     const modeBtn = e.target.closest('[data-mode]');
-    const sugg = e.target.closest('[data-suggest]');
+    const prefBtn = e.target.closest('[data-prefer]');
+    const useBtn = e.target.closest('[data-use]');
+    const more = e.target.closest('[data-more]');
+    if (more) {
+      if (rolesExpanded.has(id)) rolesExpanded.delete(id);
+      else rolesExpanded.add(id);
+      renderRoles();
+      return;
+    }
     if (modeBtn) {
       cfg.mode = modeBtn.dataset.mode;
       if (cfg.mode === 'pinned' && !cfg.modelId) {
-        const first = R.candidates(id, settings, modelsByConn, settings.current).find((c) => !(c.connectionId === settings.current.connectionId && c.modelId === settings.current.modelId)) || R.candidates(id, settings, modelsByConn, settings.current)[0];
+        const first = R.candidates(id, settings, modelsByConn, settings.current, cfg.prefer).find((c) => !c.isMain);
         if (first) {
           cfg.connectionId = first.connectionId;
           cfg.modelId = first.modelId;
         }
       }
-    } else if (sugg) {
-      const [connectionId, modelId] = sugg.dataset.suggest.split('|');
+    } else if (prefBtn) {
+      cfg.prefer = prefBtn.dataset.prefer;
+    } else if (useBtn) {
+      const [connectionId, modelId] = useBtn.dataset.use.split('|');
       cfg.mode = 'pinned';
       cfg.connectionId = connectionId;
       cfg.modelId = modelId;
     } else return;
     settings.roles[id] = cfg;
-    save();
-    renderRoles();
-  });
-  list.addEventListener('change', (e) => {
-    const sel = e.target.closest('[data-pick]');
-    if (!sel) return;
-    const card = e.target.closest('.role');
-    const id = card.dataset.role;
-    const [connectionId, modelId] = sel.value.split('|');
-    settings.roles[id] = { mode: 'pinned', connectionId, modelId };
     save();
     renderRoles();
   });

@@ -44,6 +44,11 @@ const els = {};
 function esc(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+// base64 vai direto para um atributo src: só os caracteres do alfabeto
+function b64(s) {
+  return String(s ?? '').replace(/[^A-Za-z0-9+/=]/g, '');
+}
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
@@ -422,7 +427,7 @@ function createMessageNode(msg) {
   el.className = 'msg ' + msg.role;
   el.dataset.id = msg.id;
   if (msg.role === 'user') {
-    const imgs = (msg.images || []).map((im) => `<img src="data:${esc(im.mediaType || 'image/jpeg')};base64,${im.data}" alt="${esc(im.name || 'imagem')}" data-zoom>`).join('');
+    const imgs = (msg.images || []).map((im) => `<img src="data:${esc(im.mediaType || 'image/jpeg')};base64,${b64(im.data)}" alt="${esc(im.name || 'imagem')}" data-zoom>`).join('');
     const files = (msg.files || []).map((f) => `<span title="${esc(f.name)}">📎 ${esc(f.name)}</span>`).join('');
     el.innerHTML = `<div class="bubble">${msg.context ? ctxChipHtml(msg.context) : ''}${imgs ? `<div class="msg-images">${imgs}</div>` : ''}${files ? `<div class="msg-files">${files}</div>` : ''}<div class="content"></div></div>
       <div class="msg-meta"><div class="msg-actions">
@@ -456,7 +461,7 @@ function agentRunHtml(msg) {
     .map((st) => {
       const open = state.openSteps.has(st.id) ? ' open' : '';
       const img = st.image?.data
-        ? `<img class="astep-shot" src="data:${esc(st.image.mediaType || 'image/jpeg')};base64,${st.image.data}" alt="captura" data-zoom>`
+        ? `<img class="astep-shot" src="data:${esc(st.image.mediaType || 'image/jpeg')};base64,${b64(st.image.data)}" alt="captura" data-zoom>`
         : st.hadImage
           ? '<div class="tiny">📸 captura de tela (não salva no histórico)</div>'
           : '';
@@ -2095,6 +2100,7 @@ function bindEvents() {
   els.agentStop.addEventListener('click', () => stopStreaming());
   window.addEventListener('pagehide', () => {
     state.agent?.runner.stop();
+    state.agent?.runner.browser?.detachNow?.(); // não deixa a barra de depuração presa
   });
 
   els.setupOrSave.addEventListener('click', setupOpenRouter);

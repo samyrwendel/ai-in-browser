@@ -4,6 +4,23 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.2] — 2026-09-07
+
+Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
+
+### Corrigido
+- **A lista de sites bloqueados agora vale também para leitura.** Antes ela
+  impedia o agente de clicar, digitar e navegar num domínio proibido, mas ele
+  ainda podia ler o texto, o HTML, o código-fonte, o console, a rede e tirar
+  capturas de tela dele. Todas as ferramentas de leitura passam pelo mesmo
+  guarda.
+- Sessões do depurador e seus buffers de console e rede não eram liberados
+  quando a aba era fechada, acumulando memória; agora são limpos em
+  `onDetach` e em `tabs.onRemoved`.
+- Fechar o painel no meio de uma tarefa podia deixar a barra de depuração do
+  Chrome presa; o desanexo passa a ser feito de forma síncrona ao fechar.
+- Dados base64 de imagens são saneados antes de ir para o atributo `src`.
+
 ## [1.0.1] — 2026-09-07
 
 ### Adicionado

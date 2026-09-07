@@ -70,6 +70,11 @@ escolhido. Consulte a política de quem você usar, por exemplo
 
 ## Modo Navegar (agente)
 
+A ferramenta que lê o código-fonte busca a página com os seus cookies, do mesmo
+jeito que o navegador faria, para receber exatamente o HTML que você está
+vendo. Isso vale apenas para a aba de trabalho e apenas quando você pede.
+Domínios na lista de bloqueio não podem ser lidos nem manipulados.
+
 Quando ativado, o modelo recebe informações da aba de trabalho para executar a
 tarefa que você pediu. O agente é instruído a pedir confirmação antes de ações
 sensíveis (compras, pagamentos, envio de mensagens, exclusões, alteração de

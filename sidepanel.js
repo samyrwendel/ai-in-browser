@@ -1708,8 +1708,10 @@ async function handleStorageChange(changes, area) {
 function autoResize() {
   const ta = els.input;
   ta.style.height = 'auto';
-  ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+  const max = Math.max(160, Math.round(window.innerHeight * 0.45));
+  ta.style.height = Math.max(66, Math.min(ta.scrollHeight, max)) + 'px';
 }
+window.addEventListener('resize', () => autoResize());
 
 // ---------- eventos ----------
 

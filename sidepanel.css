@@ -285,10 +285,7 @@
 .send-btn.stop .ico-send { display: none; }
 .send-btn.stop .ico-stop { display: block; }
 
-@media (max-width: 380px) {
-  .composer-hint { display: none; }
-  .model-mini { display: none; }
-}
+
 
 /* ===== drawer de conversas ===== */
 
@@ -606,11 +603,7 @@
 .browse .suggestion.browse-only { display: flex; }
 .browse .composer { border-color: rgba(var(--accent-rgb), .45); }
 
-@media (max-width: 420px) {
-  .effort-btn span { display: none; }
-  #btn-browse span { display: none; }
-  #btn-browse { width: 30px; padding: 0 6px; justify-content: center; }
-}
+
 
 .composer.drag { border-color: var(--accent); background: rgba(var(--accent-rgb), .06); }
 .attach-menu button svg { width: 16px; height: 16px; }
@@ -650,9 +643,36 @@
 .coop-menu .coop-foot button:hover { background: var(--surface-2); }
 .empty-coop { margin: -14px 0 20px !important; font-size: 12px !important; color: var(--text-3) !important; max-width: 340px !important; }
 .empty-coop b { color: var(--text-2); font-weight: 600; }
-@media (max-width: 460px) { #btn-coop #coop-label { display: none; } }
+
 
 .picker-sort { font-size: 12px; height: 28px; padding: 0 22px 0 8px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); appearance: none; -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; }
 .picker-sort option { background: var(--bg-2); color: var(--text); }
 .sheet-foot { flex-wrap: wrap; }
+
+/* ===== barra de composição em duas linhas =====
+   Linha 1: anexar, Navegar, página, cooperação. Linha 2: modelo, esforço, voz, enviar.
+   A caixa de texto começa com três linhas e cresce até 45% da altura do painel,
+   para revisar e editar o prompt antes de enviar. */
+.composer { container-type: inline-size; padding: 12px 12px 10px 14px; }
+.composer textarea { min-height: 66px; max-height: 45vh; padding: 2px 0 6px; }
+.composer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; row-gap: 8px; min-width: 0; margin-top: 4px; }
+.composer-left { flex: 1 1 100%; min-width: 0; display: flex; align-items: center; gap: 6px; }
+.composer-right { flex: 1 1 100%; min-width: 0; display: flex; align-items: center; gap: 6px; }
+.composer-left > *, .composer-right > * { flex: 0 0 auto; }
+.model-mini { flex: 1 1 auto; min-width: 0; max-width: none; margin-right: auto; overflow: hidden; white-space: nowrap; color: var(--text-2); }
+.model-mini span { display: block; overflow: hidden; text-overflow: ellipsis; }
+.coop-btn { max-width: 170px; overflow: hidden; }
+.coop-btn #coop-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer-hint { display: none; }
+/* só em painéis muito estreitos os rótulos cedem */
+@container (max-width: 330px) {
+  #btn-coop #coop-label { display: none; }
+  #btn-coop { padding: 0 7px; }
+}
+@container (max-width: 290px) {
+  #btn-browse span { display: none; }
+  #btn-browse { width: 30px; padding: 0 6px; justify-content: center; }
+  .effort-btn span { display: none; }
+  .effort-btn { width: 30px; padding: 0 6px; justify-content: center; }
+}

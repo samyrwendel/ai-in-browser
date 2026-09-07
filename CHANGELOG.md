@@ -28,6 +28,10 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   ajudante "melhor" que o principal, fixe-o.
 
 ### Alterado
+- Barra de composição em duas linhas (ferramentas em cima; modelo, esforço, voz
+  e enviar embaixo), sem sobreposição em painéis estreitos. A caixa de texto
+  começa com três linhas e cresce até 45% da altura do painel, para revisar e
+  editar o prompt antes de enviar.
 - O seletor de modelos lista os lançamentos mais recentes primeiro, com a
   data de lançamento e a etiqueta "novo" (30 dias), e permite ordenar por
   nome ou preço; lotes (`:batch`) e apelidos (`~…latest`) só aparecem quando

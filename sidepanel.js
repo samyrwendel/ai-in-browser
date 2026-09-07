@@ -249,6 +249,7 @@ async function bootstrapModels() {
   if (!state.settings.current.modelId && list.length) state.settings.current.modelId = defaultModelFor(cur.id);
   await saveSettings();
   updateHeader();
+  refreshCoop();
 }
 
 async function saveSettings() {
@@ -266,6 +267,7 @@ async function selectModel(connId, modelId) {
   }
   updateHeader();
   closePicker();
+  refreshCoop();
 }
 
 // ---------- header ----------
@@ -824,6 +826,75 @@ async function describePendingImages(mainConn, mainModelId, helpers, signal) {
   helpers.push(h);
   setAgentStatus(null);
   persist();
+}
+
+// Resumo do que a cooperação faria agora, para o indicador do painel.
+async function coopSummary(force = false) {
+  const key = JSON.stringify([state.settings.current, state.settings.roles, visibleConnections().map((c) => c.id)]);
+  if (!force && state.coopCache?.key === key) return state.coopCache.rows;
+  const mb = await modelsForRoles();
+  const main = mainSel();
+  const rows = R.ROLES.map((role) => {
+    const cfg = state.settings.roles?.[role.id] || {};
+    if (cfg.mode === 'off') return { role, status: 'off' };
+    const r = R.resolveRole(role.id, state.settings, mb, main);
+    if (!r) return { role, status: 'none' };
+    if (r.source === 'main') return { role, status: 'main', name: r.name };
+    return { role, status: r.source, name: r.name, connectionName: conn(r.connectionId)?.name || '' };
+  });
+  state.coopCache = { key, rows };
+  return rows;
+}
+
+const COOP_SRC = { auto: 'automático', pinned: 'fixo', main: 'o principal cobre', off: 'desligado', none: 'nenhum disponível' };
+
+function renderCoopIndicator(rows) {
+  const helpers = rows.filter((r) => r.status === 'auto' || r.status === 'pinned');
+  const anyOn = rows.some((r) => r.status !== 'off');
+  els.btnCoop.classList.toggle('on', helpers.length > 0);
+  els.coopCount.textContent = String(helpers.length);
+  els.coopCount.classList.toggle('hidden', helpers.length === 0);
+  const modes = new Set(rows.filter((r) => r.status !== 'none').map((r) => (r.status === 'pinned' ? 'fixo' : r.status === 'off' ? 'desligado' : 'automático')));
+  els.coopLabel.textContent = !anyOn ? 'Coop off' : modes.size === 1 && modes.has('fixo') ? 'Coop fixa' : 'Coop auto';
+  els.btnCoop.title = helpers.length
+    ? 'Cooperação: ' + helpers.map((h) => `${h.role.label} → ${h.name} (${COOP_SRC[h.status]})`).join(' · ')
+    : anyOn
+      ? 'Cooperação ativa: o modelo principal cobre todas as habilidades disponíveis'
+      : 'Cooperação desligada';
+  // linha na tela inicial
+  if (helpers.length) {
+    els.emptyCoop.innerHTML = '🤝 Cooperação: ' + helpers.slice(0, 3).map((h) => `${esc(h.role.label)} → <b>${esc(h.name)}</b>`).join(' · ') + (helpers.length > 3 ? ` · +${helpers.length - 3}` : '');
+    els.emptyCoop.classList.remove('hidden');
+  } else els.emptyCoop.classList.add('hidden');
+}
+
+function renderCoopMenu(rows) {
+  const helpers = rows.filter((r) => r.status === 'auto' || r.status === 'pinned').length;
+  els.coopMenu.innerHTML =
+    `<div class="coop-head"><span>Cooperação entre modelos</span><b>${helpers ? `${helpers} ${helpers === 1 ? 'ajudante' : 'ajudantes'}` : 'sem ajudantes'}</b></div>` +
+    rows
+      .map((r) => {
+        const dim = r.status === 'off' || r.status === 'none' || r.status === 'main';
+        const who = r.status === 'auto' || r.status === 'pinned' ? `${esc(r.name)}${r.connectionName ? ' · ' + esc(r.connectionName) : ''}` : r.status === 'main' ? esc(r.name || 'o principal') : r.status === 'off' ? 'desligado' : 'nenhum modelo ativo tem essa habilidade';
+        return `<div class="coop-row${dim ? ' dim' : ''}"><span class="ico">${r.role.icon}</span><span class="lbl">${esc(r.role.label)}</span><span class="who">${who}</span><span class="src ${r.status}">${esc(COOP_SRC[r.status])}</span></div>`;
+      })
+      .join('') +
+    `<div class="coop-foot"><button data-coop-config>Configurar cooperação</button></div>`;
+}
+
+async function refreshCoop(force = false) {
+  try {
+    const rows = await coopSummary(force);
+    renderCoopIndicator(rows);
+    if (!els.coopMenu.classList.contains('hidden')) renderCoopMenu(rows);
+  } catch (e) {
+    console.warn('[coop]', e);
+  }
+}
+
+function openOptionsAt(hash) {
+  if (S.HAS_CHROME && chrome.tabs?.create) chrome.tabs.create({ url: chrome.runtime.getURL('options.html' + (hash || '')) });
+  else window.open('options.html' + (hash || ''), '_blank');
 }
 
 async function maybeGenerateTitle() {
@@ -1591,6 +1662,7 @@ async function handleStorageChange(changes, area) {
       renderPickerFilters();
       renderPicker();
     }
+    refreshCoop(true);
     if (state.settings.connections.some((c) => isConfigured(c))) hideSetup();
   }
   if (changes.chats && !state.streaming) {
@@ -1898,6 +1970,25 @@ function bindEvents() {
     if (!els.effortMenu.classList.contains('hidden') && !e.target.closest('#effort-menu') && !e.target.closest('#btn-effort')) els.effortMenu.classList.add('hidden');
   });
   els.btnMic.addEventListener('click', toggleMic);
+  els.btnCoop.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!els.coopMenu.classList.contains('hidden')) return els.coopMenu.classList.add('hidden');
+    els.effortMenu.classList.add('hidden');
+    els.coopMenu.innerHTML = '<div class="coop-head"><span>Cooperação entre modelos</span><b>calculando…</b></div>';
+    els.coopMenu.classList.remove('hidden');
+    const rows = await coopSummary(true);
+    renderCoopIndicator(rows);
+    renderCoopMenu(rows);
+  });
+  els.coopMenu.addEventListener('click', (e) => {
+    if (e.target.closest('[data-coop-config]')) {
+      els.coopMenu.classList.add('hidden');
+      openOptionsAt('#cooperation');
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (!els.coopMenu.classList.contains('hidden') && !e.target.closest('#coop-menu') && !e.target.closest('#btn-coop')) els.coopMenu.classList.add('hidden');
+  });
   els.agentStop.addEventListener('click', () => stopStreaming());
   window.addEventListener('pagehide', () => {
     state.agent?.runner.stop();
@@ -1920,6 +2011,7 @@ function bindEvents() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (!els.coopMenu.classList.contains('hidden')) return els.coopMenu.classList.add('hidden');
       if (!els.picker.classList.contains('hidden')) return closePicker();
       if (!els.menu.classList.contains('hidden')) return els.menu.classList.add('hidden');
       if (els.chats.classList.contains('open')) return closeChats();
@@ -1976,6 +2068,11 @@ async function init() {
     effortLabel: $('#effort-label'),
     effortMenu: $('#effort-menu'),
     btnMic: $('#btn-mic'),
+    btnCoop: $('#btn-coop'),
+    coopLabel: $('#coop-label'),
+    coopCount: $('#coop-count'),
+    coopMenu: $('#coop-menu'),
+    emptyCoop: $('#empty-coop'),
     agentStatus: $('#agent-status'),
     agentStatusText: $('#agent-status-text'),
     agentStop: $('#agent-stop'),

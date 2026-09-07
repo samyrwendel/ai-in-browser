@@ -20,7 +20,11 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   qualidade conhecida para a habilidade, preço por milhão de tokens e
   contexto, além da explicação do que o automático escolheria. Roteadores
   como o Auto Router ficam fora das sugestões. As mensagens mostram quem
-  cooperou.
+  cooperou, e um indicador na barra de composição mostra, antes de enviar,
+  quantos ajudantes estão em jogo e quem cobre cada habilidade (automático,
+  fixo, o principal cobre, desligado). O automático só preenche lacunas:
+  se o modelo principal tem a habilidade, ele mesmo cobre; para usar um
+  ajudante "melhor" que o principal, fixe-o.
 
 ### Alterado
 - Provedores começam **desativados** e passam a ativos quando você cola uma

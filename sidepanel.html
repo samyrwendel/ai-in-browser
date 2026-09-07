@@ -36,6 +36,7 @@
     <symbol id="i-paperclip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 11.5-8.5 8.5a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 16-5-5-8 8"/></symbol>
     <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-coop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2.5 19a4.5 4.5 0 0 1 9 0M12.5 19a4.5 4.5 0 0 1 9 0"/></symbol>
     <symbol id="i-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></symbol>
   </svg>
 
@@ -83,6 +84,7 @@
           <div class="orb"><svg><use href="#i-sparkle"/></svg></div>
           <h1>Como posso ajudar?</h1>
           <p id="empty-sub" class="muted">Escolha um modelo e comece a conversar.</p>
+          <p id="empty-coop" class="empty-coop hidden"></p>
           <div class="suggestions">
             <button class="suggestion" data-action="summarize"><span class="s-ico">📄</span><span>Resumir esta página</span></button>
             <button class="suggestion browse-only" data-prompt="Pesquise no Google por "><span class="s-ico">🔎</span><span>Pesquisar na web</span></button>
@@ -111,6 +113,7 @@
               <input id="file-input" type="file" multiple accept="image/*,.txt,.md,.markdown,.csv,.json,.html,.htm,.xml,.js,.ts,.py,.css,.log,.yaml,.yml" class="hidden">
               <button id="btn-browse" class="tool-btn" title="Modo Navegar: o assistente vê e age nas suas abas (clica, digita, navega)"><svg><use href="#i-cursor"/></svg><span>Navegar</span></button>
               <button id="btn-page" class="tool-btn icon-only" title="Anexar o conteúdo da página atual"><svg><use href="#i-page"/></svg></button>
+              <button id="btn-coop" class="tool-btn coop-btn" title="Cooperação entre modelos"><svg><use href="#i-coop"/></svg><span id="coop-label">Coop</span><span id="coop-count" class="coop-count hidden"></span></button>
             </div>
             <div class="composer-right">
               <button id="btn-model-mini" class="tool-btn model-mini" title="Trocar modelo (Ctrl+K)"><span id="model-mini-name">modelo</span></button>
@@ -121,6 +124,7 @@
           </div>
         </div>
         <div id="effort-menu" class="menu effort-menu hidden"></div>
+        <div id="coop-menu" class="menu coop-menu hidden"></div>
       </footer>
     </div>
 

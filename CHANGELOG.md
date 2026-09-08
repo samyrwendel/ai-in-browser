@@ -4,6 +4,16 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.3] — 2026-09-07
+
+### Corrigido
+- O agente podia ficar preso para sempre numa tarefa de visão. As chamadas ao
+  modelo que descreve imagens não tinham prazo, e na descrição de anexos elas
+  nem recebiam o sinal de cancelamento, então o botão Parar não as alcançava.
+  Agora a descrição expira em 90 segundos e a geração de título em 25, o
+  cancelamento vale desde o primeiro instante, e o passo mostra "visão
+  expirou" com orientação para o agente seguir pelo texto da página.
+
 ## [1.0.2] — 2026-09-07
 
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.

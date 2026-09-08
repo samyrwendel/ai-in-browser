@@ -466,7 +466,7 @@ function agentRunHtml(msg) {
           ? '<div class="tiny">📸 captura de tela (não salva no histórico)</div>'
           : '';
       const helperTag = st.helper ? `<span class="astep-helper" title="descrito por um modelo com visão">👁️ ${esc(st.helper.name)}</span>` : '';
-      const noteTag = st.note === 'sem visão' ? '<span class="astep-note" title="nenhum modelo com visão ativo">sem visão</span>' : st.note === 'falha na visão' ? '<span class="astep-note err">falha na visão</span>' : '';
+      const noteTag = st.note === 'sem visão' ? '<span class="astep-note" title="nenhum modelo com visão ativo">sem visão</span>' : st.note === 'falha na visão' ? '<span class="astep-note err">falha na visão</span>' : st.note === 'visão expirou' ? '<span class="astep-note err" title="o modelo de visão não respondeu a tempo">visão expirou</span>' : '';
       return `<div class="astep ${esc(st.status || 'ok')}" data-sid="${esc(st.id)}">
         <span class="astep-ico">${st.icon || '🔧'}</span>
         <div class="astep-body">
@@ -1033,19 +1033,35 @@ async function runAgentTask(text, ctx, userMsg) {
   // imagens anexadas pelo usuário: o agente trabalha com texto, então elas são
   // descritas antes (pelo próprio modelo, se enxergar, ou pelo ajudante de visão)
   let attachedNote = '';
+  // a descrição do anexo acontece antes do agente existir: um controlador
+  // próprio garante que o botão Parar interrompa também essa fase
+  const pre = new AbortController();
+  state.streaming = { abort: pre, msg, node };
+  setSendState();
   if (userMsg?.images?.length) {
     const own = P.modelSupportsVision(c, mInfo);
     const describer = own ? { conn: c, modelId, name: displayName(mInfo) } : visionHelper;
     if (!userMsg.imageDescriptions && describer) {
       setAgentStatus(`Descrevendo ${userMsg.images.length === 1 ? 'a imagem anexada' : 'as imagens anexadas'} com ${describer.name}…`);
       try {
-        userMsg.imageDescriptions = [await R.describeImages(describer.conn, describer.modelId, userMsg.images, { purpose: 'chat', question: text })];
+        userMsg.imageDescriptions = [await R.describeImages(describer.conn, describer.modelId, userMsg.images, { purpose: 'chat', question: text, signal: pre.signal })];
         if (!own) {
           helpers.push({ role: 'vision', connectionId: describer.conn.id, modelId: describer.modelId, name: describer.name, source: 'auto' });
         }
         persist();
       } catch (e) {
-        userMsg.imageDescriptions = [`(não foi possível descrever: ${P.networkErrorMessage(e, describer.conn) || e?.message || e})`];
+        if (pre.signal.aborted) {
+          msg.pending = false;
+          msg.stopped = true;
+          msg.status = 'aborted';
+          state.streaming = null;
+          setAgentStatus(null);
+          setSendState();
+          updateAssistantNode(node, msg);
+          persist();
+          return;
+        }
+        userMsg.imageDescriptions = [`(não foi possível descrever: ${e?.name === 'HelperTimeout' ? e.message : P.networkErrorMessage(e, describer.conn) || e?.message || e})`];
       }
       setAgentStatus(null);
     }

@@ -1,4 +1,4 @@
-# Validação da 1.0.2 no Chrome real
+# Validação da 1.0.3 no Chrome real
 
 Resultado das sessões de teste de 2026-09-07, feitas pelo usuário no Chrome com
 a extensão descompactada. Doze dos dezesseis itens passaram, incluindo todos os
@@ -61,11 +61,11 @@ metade; e a perda da aba de origem no retorno de um desvio.
 
 ## Conclusão
 
-A 1.0.2 está fechada e pronta para o envio à Chrome Web Store. O pacote é
-`dist/ai-in-browser-1.0.2.zip`, e o Chrome o empacota sem emitir nenhum aviso
-de manifesto. As verificações automatizadas somam 62.
+A 1.0.3 está fechada e pronta para o envio à Chrome Web Store. O pacote é
+`dist/ai-in-browser-1.0.3.zip`, e o Chrome o empacota sem emitir nenhum aviso
+de manifesto. As verificações automatizadas somam 62 e rodam com `./tests/run.sh`.
 
-## Backlog, fora da 1.0.2
+## Backlog, fora da 1.0.3
 
 - Transcrição de arquivos de áudio (papel novo na cooperação).
 - Legendas de vídeo por link do YouTube.

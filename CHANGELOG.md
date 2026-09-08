@@ -4,9 +4,10 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
-## [1.0.2] — 2026-09-07
+## [1.0.3] — 2026-09-08
 
-Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
+Correções encontradas testando a extensão no Chrome de verdade, depois que a
+1.0.2 foi publicada. Nenhuma delas tinha aparecido nos testes automatizados.
 
 ### Corrigido
 - **O agente se perdia da aba onde a tarefa começou.** Num desvio para
@@ -52,6 +53,21 @@ Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
   antes: se já estiver concedida, dita na hora; se não, explica que a
   liberação precisa acontecer fora do painel e abre Configurações →
   Comportamento, onde "Testar microfone" faz o Chrome perguntar.
+
+### Alterado
+- As verificações automatizadas passaram a morar no repositório, em `tests/`,
+  com um runner (`tests/run.sh`) que roda tudo com o Node, sem dependências.
+  São 62 verificações em sete suítes.
+- `build.sh` usa `zip -X`, então dois pacotes gerados do mesmo código saem com
+  os mesmos bytes. Antes, o campo extra com o horário de acesso dos arquivos
+  mudava a cada leitura e impedia conferir o pacote publicado contra um build
+  local.
+
+## [1.0.2] — 2026-09-07
+
+Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
+
+### Corrigido
 - O agente podia ficar preso para sempre numa tarefa de visão. As chamadas ao
   modelo que descreve imagens não tinham prazo, e na descrição de anexos elas
   nem recebiam o sinal de cancelamento, então o botão Parar não as alcançava.

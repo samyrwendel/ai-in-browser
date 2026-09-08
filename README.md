@@ -153,7 +153,7 @@ visão (`timeout`) e a âncora da aba de origem no prompt do agente (`hometab`).
 Elas não substituem o teste no Chrome real: rodam contra um navegador simulado
 e um servidor de mentira, e a maioria dos defeitos desta extensão apareceu só
 no navegador de verdade. O roteiro de validação manual está em
-`TESTE-1.0.2.md`.
+`TESTE-1.0.3.md`.
 
 `build.sh` usa `zip -X`, então dois pacotes gerados do mesmo código saem com
 os mesmos bytes e dá para conferir o arquivo publicado contra um build local.

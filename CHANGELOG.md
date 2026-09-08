@@ -4,6 +4,21 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.8] — 2026-09-08
+
+### Corrigido
+- **Servidor local em outra máquina sumia da lista, sem erro.** O prazo para
+  listar modelos de uma conexão marcada como local era de 3 segundos. Esse
+  número existe para a detecção automática não travar quando o Ollama não
+  está instalado em `localhost`: ou algo responde na hora, ou não há nada
+  ali. Só que a mesma conexão apontada para outra máquina — por Tailscale,
+  por exemplo — depende da rede: no Mac a listagem levava 12 ms, no Windows
+  estourava o prazo. Pior, a falha era tratada como "não instalado", então a
+  conexão sumia em silêncio em vez de explicar o motivo. Agora o prazo curto
+  vale só para endereços de loopback de verdade (`localhost`, `127.x`,
+  `::1`); apontada para outro host, a conexão ganha 15 segundos e, se falhar,
+  mostra o erro como qualquer provedor remoto.
+
 ## [1.0.7] — 2026-09-08
 
 ### Corrigido

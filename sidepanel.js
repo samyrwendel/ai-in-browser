@@ -177,7 +177,7 @@ async function ensureModels(connId, { force = false } = {}) {
   if (c.local && !force && !state.localDetected[connId] && state.modelStatus[connId] === 'off') return [];
   state.modelStatus[connId] = 'loading';
   try {
-    const models = await P.fetchModels(c, { timeoutMs: c.local ? 3000 : 20000 });
+    const models = await P.fetchModels(c, { timeoutMs: P.modelsTimeout(c) });
     state.models[connId] = models;
     state.modelStatus[connId] = 'ok';
     state.modelError[connId] = '';
@@ -185,9 +185,10 @@ async function ensureModels(connId, { force = false } = {}) {
     await S.setModelCache(connId, models);
     return models;
   } catch (e) {
-    state.modelStatus[connId] = c.local ? 'off' : 'error';
+    const localDeVerdade = c.local && P.isLoopbackUrl(c.baseUrl);
+    state.modelStatus[connId] = localDeVerdade ? 'off' : 'error';
     state.modelError[connId] = P.networkErrorMessage(e, c) || 'Falha ao carregar';
-    if (c.local) state.localDetected[connId] = false;
+    if (c.local) state.localDetected[connId] = localDeVerdade ? false : true;
     if (!c.local && P.FALLBACK_MODELS[c.type] && !state.models[connId]?.length) {
       state.models[connId] = P.FALLBACK_MODELS[c.type];
     }

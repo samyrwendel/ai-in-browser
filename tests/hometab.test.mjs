@@ -30,10 +30,16 @@ ok(/NEVER answer from memory anything that changes over time/.test(away), 'regra
 const { toolsFor } = await import('../lib/tools.js');
 const comBusca = buildSystemPrompt({ maxSteps: 25, jsonMode: false, tools: toolsFor({ webSearch: true }), userSystem: '', tabInfo: other, homeTab: home, vision: true });
 const semBusca = buildSystemPrompt({ maxSteps: 25, jsonMode: false, tools: toolsFor({ webSearch: false }), userSystem: '', tabInfo: other, homeTab: home, vision: true });
+const semNada = buildSystemPrompt({ maxSteps: 25, jsonMode: false, tools: toolsFor({ webSearch: false, fetchUrl: false }), userSystem: '', tabInfo: other, homeTab: home, vision: true });
 ok(/call web_search FIRST/.test(comBusca), 'com busca: manda usar web_search antes de abrir aba');
-ok(!/You have no search tool/.test(comBusca), 'com busca: não emite o aviso de ausência');
-ok(/You have no search tool/.test(semBusca), 'sem busca: avisa que precisa abrir aba');
+ok(/call fetch_url instead of opening it/.test(comBusca), 'com busca: manda ler por fetch_url em vez de abrir aba');
+ok(!/no web search tool/.test(comBusca), 'com busca: não diz que falta busca');
 ok(!/call web_search FIRST/.test(semBusca), 'sem busca: não cita uma ferramenta inexistente');
+ok(/read any page whose address you already know with fetch_url/.test(semBusca), 'só com leitura: lembra que fetch_url resolve endereço conhecido');
+ok(/only to DISCOVER an address you do not know/.test(semBusca), 'só com leitura: abrir buscador vira exceção, não regra');
+ok(/Busca na web/.test(semBusca), 'só com leitura: manda avisar o usuário que dá para configurar busca');
+ok(/You have no search or fetch tool/.test(semNada), 'sem nada: aí sim diz que precisa abrir aba');
+ok(!/fetch_url/.test(semNada), 'sem nada: não cita fetch_url');
 ok(toolsFor({ webSearch: true }).some((t) => t.name === 'web_search'), 'web_search entra na lista quando configurada');
 ok(!toolsFor({ webSearch: false }).some((t) => t.name === 'web_search'), 'web_search fica fora quando não configurada');
 ok(toolsFor({}).some((t) => t.name === 'fetch_url'), 'fetch_url vem ligada por padrão');

@@ -21,9 +21,11 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   sem sessão: página que exige login continua sendo trabalho do modo Navegar,
   na aba real do usuário.
 - A orientação do agente passa a mandar buscar antes de abrir aba, e abrir aba
-  só quando for preciso agir na página ou quando ela depender do login. Sem
-  provedor configurado, ele é avisado de que não tem busca e volta ao caminho
-  antigo.
+  só quando for preciso agir na página ou quando ela depender do login. A
+  orientação tem três cenários: com busca e leitura, só com leitura, e sem
+  nenhuma das duas. No cenário do meio ele é lembrado de que a `fetch_url`
+  resolve qualquer endereço que ele já conheça, e de avisar o usuário que
+  configurar um provedor deixaria tudo mais barato.
 
 ### Segurança
 - A lista de sites bloqueados vale para as duas ferramentas novas: resultados

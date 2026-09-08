@@ -104,6 +104,7 @@ lib/tools.js       definições das ferramentas
 lib/markdown.js    Markdown seguro sem dependências
 lib/highlight.js   realce de sintaxe leve
 lib/storage.js     armazenamento
+tests/             verificações automatizadas (Node puro, sem dependências)
 ```
 
 ## Permissões
@@ -133,10 +134,29 @@ Não há build: é JavaScript com módulos ES nativos, sem dependências e sem b
 Edite os arquivos e clique em recarregar em `chrome://extensions`.
 
 ```bash
+./tests/run.sh                # roda todas as verificações
+./tests/run.sh roles          # roda só as suítes cujo nome casa com "roles"
 ./build.sh                    # gera dist/ai-in-browser-<versao>.zip para a loja
 python3 -m http.server 8765   # abre as páginas fora da extensão (usa localStorage)
 ./store/_shots/capture.sh     # regenera as capturas 1280x800 da loja
 ```
+
+### Testes
+
+`tests/run.sh` roda 62 verificações em sete suítes, só com o Node, sem instalar
+nada. Elas cobrem a escolha de modelos na cooperação e as explicações do
+automático (`rank`, `explain`), as regras que removem o cabeçalho `Origin`
+(`netrules`), a escolha da aba de trabalho (`choosetab`), a lista de domínios
+bloqueados aplicada também à leitura (`blocklist`), os prazos das tarefas de
+visão (`timeout`) e a âncora da aba de origem no prompt do agente (`hometab`).
+
+Elas não substituem o teste no Chrome real: rodam contra um navegador simulado
+e um servidor de mentira, e a maioria dos defeitos desta extensão apareceu só
+no navegador de verdade. O roteiro de validação manual está em
+`TESTE-1.0.2.md`.
+
+`build.sh` usa `zip -X`, então dois pacotes gerados do mesmo código saem com
+os mesmos bytes e dá para conferir o arquivo publicado contra um build local.
 
 Fora da extensão, `lib/storage.js` cai para o `localStorage` e o agente usa um
 navegador simulado, o que ajuda a mexer no visual sem recarregar a extensão.

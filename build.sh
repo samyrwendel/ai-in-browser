@@ -9,7 +9,11 @@ OUT="dist/ai-in-browser-${VERSION}.zip"
 rm -rf dist
 mkdir -p dist
 
-zip -qr "$OUT" \
+# -X descarta os campos extras (dono, grupo e horário de acesso). Sem isso o
+# horário de acesso muda a cada leitura e dois pacotes do mesmo código saem
+# com bytes diferentes, impedindo conferir o arquivo publicado contra um
+# build local.
+zip -qrX "$OUT" \
   manifest.json \
   background.js \
   sidepanel.html sidepanel.css sidepanel.js \

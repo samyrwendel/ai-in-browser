@@ -1,0 +1,16 @@
+import { chooseTab } from '../lib/browser.js';
+const web = { id: 1, url: 'https://quantt.academy/contas', title: 'Minhas contas', lastAccessed: 100 };
+const web2 = { id: 2, url: 'https://google.com', title: 'Google', lastAccessed: 50 };
+const opts = { id: 3, url: 'chrome-extension://abc/options.html', title: 'Configurações' };
+const ok = (n, c) => console.log((c ? 'ok    ' : 'FALHA ') + n);
+let r = chooseTab({ active: web, all: [web, web2, opts] });
+ok('aba ativa web é usada sem aviso', r.tab === web && r.note === null);
+r = chooseTab({ active: opts, all: [web2, opts, web] });
+ok('aba ativa interna: usa a web mais recente', r.tab === web);
+ok('…e avisa citando as configurações e o título', /configurações desta extensão/.test(r.note) && /Minhas contas/.test(r.note));
+r = chooseTab({ active: { id: 9, url: 'chrome://newtab/' }, all: [web2] });
+ok('nova aba em branco descrita como tal', /aba em branco/.test(r.note) && r.tab === web2);
+r = chooseTab({ preferred: web2, active: web, all: [web, web2] });
+ok('aba preferida (menu de contexto) vence a ativa', r.tab === web2 && r.note === null);
+r = chooseTab({ active: opts, all: [opts] });
+ok('sem página web nenhuma: tab null', r.tab === null);

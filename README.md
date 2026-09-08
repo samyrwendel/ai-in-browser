@@ -155,8 +155,16 @@ e um servidor de mentira, e a maioria dos defeitos desta extensão apareceu só
 no navegador de verdade. O roteiro de validação manual está em
 `TESTE-1.0.3.md`.
 
-`build.sh` usa `zip -X`, então dois pacotes gerados do mesmo código saem com
-os mesmos bytes e dá para conferir o arquivo publicado contra um build local.
+`build.sh` usa `zip -X` para descartar os campos extras (dono, grupo e horário
+de acesso), que mudavam a cada leitura. Com isso dois builds da mesma cópia de
+trabalho saem byte a byte iguais. Entre máquinas diferentes os bytes ainda
+divergem, porque o `zip` guarda a data de modificação de cada arquivo e o
+checkout da CI cria datas novas; a comparação que vale nesse caso é a lista de
+arquivos e CRCs:
+
+```bash
+unzip -v dist/ai-in-browser-<versao>.zip | awk 'NF>7{print $8,$7}' | sort
+```
 
 Fora da extensão, `lib/storage.js` cai para o `localStorage` e o agente usa um
 navegador simulado, o que ajuda a mexer no visual sem recarregar a extensão.

@@ -58,10 +58,11 @@ Correções encontradas testando a extensão no Chrome de verdade, depois que a
 - As verificações automatizadas passaram a morar no repositório, em `tests/`,
   com um runner (`tests/run.sh`) que roda tudo com o Node, sem dependências.
   São 62 verificações em sete suítes.
-- `build.sh` usa `zip -X`, então dois pacotes gerados do mesmo código saem com
-  os mesmos bytes. Antes, o campo extra com o horário de acesso dos arquivos
-  mudava a cada leitura e impedia conferir o pacote publicado contra um build
-  local.
+- `build.sh` usa `zip -X`: antes, o campo extra com o horário de acesso dos
+  arquivos mudava a cada leitura e dois builds seguidos da mesma cópia saíam
+  com bytes diferentes. Entre máquinas os bytes ainda divergem por causa das
+  datas de modificação, então a conferência entre o pacote publicado e um
+  build local é pela lista de arquivos e CRCs.
 
 ## [1.0.2] — 2026-09-07
 

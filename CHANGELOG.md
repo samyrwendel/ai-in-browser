@@ -9,6 +9,14 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
 
 ### Corrigido
+- **O agente podia apagar um formulário pela metade.** A orientação mandava
+  ir direto a uma URL conhecida quando uma ação falhava, e `navigate` troca a
+  página da aba de trabalho, descartando tudo que já tinha sido digitado. Se o
+  modelo precisasse consultar algo no meio de um preenchimento, havia boa
+  chance de levar a própria aba do formulário para o buscador. Agora ele é
+  instruído a nunca navegar a aba que tem trabalho em andamento: abre uma aba
+  à parte para o desvio, volta para concluir e fecha o desvio. A descrição da
+  ferramenta `navigate` também avisa do descarte.
 - **Nenhuma resposta aparecia.** Uma variável usada antes de existir derrubava
   a função que cria a mensagem do assistente, e o envio falhava em silêncio com
   qualquer modelo e qualquer provedor.

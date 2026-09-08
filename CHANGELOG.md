@@ -9,6 +9,15 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
 
 ### Corrigido
+- **O agente inventava dados que mudam com o tempo.** Ao preencher um campo
+  com "a cotação do dólar hoje", o modelo escreveu um valor tirado da memória
+  do treinamento, sem fazer nenhuma consulta, e ainda listou o valor na
+  resposta final como se tivesse verificado. A regra genérica de só confiar
+  em resultados de ferramentas não bastava para modelos pequenos. Agora há
+  uma proibição explícita: cotações, preços, clima, notícias, placares,
+  horários, disponibilidade e qualquer coisa "de hoje" ou "atual" têm de ser
+  consultadas com uma ferramenta; sem conseguir consultar, ele avisa e
+  pergunta, em vez de escrever um número inventado na página.
 - **O agente podia apagar um formulário pela metade.** A orientação mandava
   ir direto a uma URL conhecida quando uma ação falhava, e `navigate` troca a
   página da aba de trabalho, descartando tudo que já tinha sido digitado. Se o

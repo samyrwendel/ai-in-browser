@@ -4,6 +4,19 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.7] — 2026-09-08
+
+### Corrigido
+- **Impasse ao testar um servidor local desativado.** A regra que remove o
+  cabeçalho `Origin` — a que evita o 403 do Ollama sem exigir
+  `OLLAMA_ORIGINS` — só era criada para conexões **ativas**. Como o botão
+  *Testar conexão* sincroniza as regras e só então faz o POST de prova,
+  testar uma conexão local desativada dava 403 sempre, e ativá-la dependia
+  justamente de o teste passar. Agora a regra vale também para conexões
+  desativadas. Ela é inócua: só afeta requisições que a própria extensão faz
+  para aquela URL base, e uma conexão desativada não faz nenhuma além do
+  teste.
+
 ## [1.0.6] — 2026-09-08
 
 ### Corrigido

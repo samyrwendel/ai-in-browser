@@ -13,12 +13,13 @@ const conns = [
 ];
 const rules = buildOriginRules(conns, 'fbkjajcphbgpcaghmnihplolhjnifikn');
 const check = (nome, ok) => console.log((ok ? 'ok    ' : 'FALHA ') + nome);
-check('gera 2 regras (ollama remoto + groq); ignora oficiais, desativada, duplicada, inválidas', rules.length === 2);
+check('gera 3 regras (ollama, lmstudio desativada, groq); ignora oficiais, duplicada, inválidas', rules.length === 3);
+check('conexão desativada também ganha regra, senão testá-la antes de ativar dá 403 para sempre', rules.some((r) => r.condition.urlFilter === '|http://localhost:1234/'));
 check('ollama remoto com urlFilter ancorado', rules[0].condition.urlFilter === '|http://100.97.5.57:11434/');
-check('groq incluído (compatível OpenAI, não oficial)', rules[1].condition.urlFilter === '|https://api.groq.com/');
+check('groq incluído (compatível OpenAI, não oficial)', rules.some((r) => r.condition.urlFilter === '|https://api.groq.com/'));
 check('remove o cabeçalho Origin', rules[0].action.requestHeaders[0].header === 'Origin' && rules[0].action.requestHeaders[0].operation === 'remove');
 check('restrito às requisições da própria extensão', rules[0].condition.initiatorDomains?.[0] === 'fbkjajcphbgpcaghmnihplolhjnifikn');
 check('só xmlhttprequest', rules[0].condition.resourceTypes.join() === 'xmlhttprequest');
-check('ids estáveis a partir de 7000', rules[0].id === 7000 && rules[1].id === 7001);
+check('ids estáveis e sequenciais a partir de 7000', rules.map((r) => r.id).join() === '7000,7001,7002');
 check('sem initiator quando não há id', buildOriginRules(conns, null)[0].condition.initiatorDomains === undefined);
 check('originFor descarta esquema não http', originFor('ftp://x') === null && originFor('http://a:1/v1') === 'http://a:1');

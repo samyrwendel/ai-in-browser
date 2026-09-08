@@ -4,6 +4,20 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.5] — 2026-09-08
+
+### Corrigido
+- **Sem provedor de busca, o agente não sabia que tinha a `fetch_url`.** A
+  orientação dizia "você não tem ferramenta de busca, abra um buscador numa
+  aba", ignorando que a leitura direta vem ligada por padrão e resolve
+  qualquer endereço já conhecido. Num teste real isso custou 25 ações e 147
+  mil tokens para não chegar à home de um site cujo endereço estava na
+  própria pergunta. A orientação passa a ter três cenários, e no do meio o
+  modelo é lembrado da `fetch_url` e de avisar o usuário que configurar um
+  provedor sairia mais barato.
+- As descrições de `open_tab` e `navigate` também apontam a `fetch_url` para
+  quando a intenção é só ler, no momento em que o modelo escolhe a ferramenta.
+
 ## [1.0.4] — 2026-09-08
 
 ### Adicionado

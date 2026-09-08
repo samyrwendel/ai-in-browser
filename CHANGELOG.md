@@ -9,6 +9,14 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
 
 ### Corrigido
+- **O agente se perdia da aba onde a tarefa começou.** Num desvio para
+  consultar outro site, ele voltava navegando pela URL da página original em
+  vez de trocar de aba, e a navegação recarregava a página e apagava tudo que
+  já tinha sido preenchido. O prompt não dizia qual era a aba de origem nem
+  mostrava o identificador da aba atual, então as trocas de aba viravam
+  chute. Agora a aba onde a tarefa começou é registrada no primeiro passo e
+  aparece no prompt com o identificador, junto da instrução de voltar por
+  `switch_tab` e nunca pela URL.
 - **`audioCapture` era uma permissão inválida.** O Chrome recusava a
   declaração com *"'audioCapture' is only allowed for packaged apps"*, então
   ela era descartada do manifest e o pedido em tempo de execução falhava com

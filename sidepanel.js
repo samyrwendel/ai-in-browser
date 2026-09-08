@@ -1082,6 +1082,8 @@ async function runAgentTask(text, ctx, userMsg) {
     settings: s,
     perms,
     visionHelper,
+    // o provedor de busca do OpenRouter usa uma conexão configurada
+    searchConn: s.search?.provider === 'openrouter' ? conn(s.search.connectionId) : null,
     onEvent: (ev) => {
       if (ev.type === 'step') {
         const i = msg.steps.findIndex((x) => x.id === ev.step.id);

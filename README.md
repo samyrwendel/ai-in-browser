@@ -26,6 +26,7 @@
 
 - **Conversa com consciência da página** — anexe o texto da aba atual com um clique, selecione um trecho e use o botão direito, ou deixe o agente ler sozinho.
 - **Modo Navegar (agente)** — o modelo vê a página (elementos numerados + texto), clica, digita, rola, seleciona opções, abre e troca abas, espera carregamentos, lê o HTML vivo e o **código-fonte**, executa JavaScript, lê console e rede, tira **capturas de tela com etiquetas numeradas** para modelos com visão e pergunta a você antes de ações sensíveis. É um Playwright rodando dentro do Chrome, via `chrome.scripting` e o **Chrome DevTools Protocol** (`chrome.debugger`).
+- **Busca na web por API** — `web_search` consulta por HTTP e recebe uma lista curta de resultados, em vez de abrir um buscador numa aba e ler a página inteira (o que custava perto de trinta mil tokens). Provedores: **SearXNG** na sua instância (sem chave, sem terceiros), **OpenRouter** pelo plugin `web`, **Exa** e **Tavily**. E `fetch_url` lê o texto de qualquer endereço sem abrir aba e sem precisar de chave.
 - **Centenas de modelos** — Claude, GPT, Gemini, DeepSeek, Grok, Llama, Qwen, Mistral… via OpenRouter, com preço e contexto ao escolher. LLMs locais (Ollama/LM Studio) detectados automaticamente.
 - **Barra de composição completa** — anexos (imagens e arquivos de texto, colar ou arrastar), captura da aba atual, ditado por voz pelo microfone (transcrição feita pelo navegador, o áudio nunca vai ao provedor), seletor de esforço de raciocínio, troca de modelo com <kbd>Ctrl</kbd>+<kbd>K</kbd>. Arquivos de áudio e vídeo ainda não são suportados.
 - **Streaming**, Markdown completo com realce de código, tabelas, bloco de raciocínio, tokens e custo por resposta.
@@ -100,6 +101,7 @@ options.*          configurações
 lib/providers.js   OpenRouter / OpenAI-compat / Anthropic: streaming, tools, imagens, esforço
 lib/agent.js       loop do agente (tool calling nativo ou JSON)
 lib/browser.js     controlador do navegador: DOM indexado, ações, CDP, capturas
+lib/search.js      busca na web (SearXNG, OpenRouter, Exa, Tavily) e leitura de URL
 lib/tools.js       definições das ferramentas
 lib/markdown.js    Markdown seguro sem dependências
 lib/highlight.js   realce de sintaxe leve

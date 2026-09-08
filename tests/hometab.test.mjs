@@ -26,5 +26,18 @@ ok(P(null, home).includes('switch_tab with tab_id 7'), 'sem aba atual: a âncora
 ok(/navigate and navigate_history replace the page/.test(away), 'guarda do formulário continua no prompt');
 ok(/NEVER answer from memory anything that changes over time/.test(away), 'regra anti-invenção continua no prompt');
 
+// a orientação de busca só aparece quando a ferramenta existe
+const { toolsFor } = await import('../lib/tools.js');
+const comBusca = buildSystemPrompt({ maxSteps: 25, jsonMode: false, tools: toolsFor({ webSearch: true }), userSystem: '', tabInfo: other, homeTab: home, vision: true });
+const semBusca = buildSystemPrompt({ maxSteps: 25, jsonMode: false, tools: toolsFor({ webSearch: false }), userSystem: '', tabInfo: other, homeTab: home, vision: true });
+ok(/call web_search FIRST/.test(comBusca), 'com busca: manda usar web_search antes de abrir aba');
+ok(!/You have no search tool/.test(comBusca), 'com busca: não emite o aviso de ausência');
+ok(/You have no search tool/.test(semBusca), 'sem busca: avisa que precisa abrir aba');
+ok(!/call web_search FIRST/.test(semBusca), 'sem busca: não cita uma ferramenta inexistente');
+ok(toolsFor({ webSearch: true }).some((t) => t.name === 'web_search'), 'web_search entra na lista quando configurada');
+ok(!toolsFor({ webSearch: false }).some((t) => t.name === 'web_search'), 'web_search fica fora quando não configurada');
+ok(toolsFor({}).some((t) => t.name === 'fetch_url'), 'fetch_url vem ligada por padrão');
+ok(!toolsFor({ fetchUrl: false }).some((t) => t.name === 'fetch_url'), 'fetch_url some quando desligada');
+
 console.log(fails ? `\n${fails} falha(s)` : '\ntudo certo');
 process.exit(fails ? 1 : 0);

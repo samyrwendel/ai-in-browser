@@ -33,6 +33,7 @@
       <nav>
         <a href="#connections" class="nav-link active">Conexões</a>
         <a href="#agent" class="nav-link">Agente (Navegar)</a>
+        <a href="#search" class="nav-link">Busca na web</a>
         <a href="#cooperation" class="nav-link">Cooperação</a>
         <a href="#model" class="nav-link">Modelo e prompt</a>
         <a href="#appearance" class="nav-link">Aparência</a>
@@ -131,6 +132,52 @@
             <textarea id="agent-prompt" class="textarea" rows="3" placeholder="Ex.: Sempre use o site X para buscas. Nunca faça compras."></textarea>
           </label>
           <p class="tiny">Por padrão o agente pergunta antes de ações sensíveis (compras, envio de mensagens, exclusões, senhas) e nunca resolve CAPTCHAs. Você pode interromper a qualquer momento com <b>Parar</b> ou <span class="kbd">Esc</span>.</p>
+        </div>
+      </section>
+
+      <!-- ===== Busca na web ===== -->
+      <section id="search" class="section">
+        <div class="section-head">
+          <h2>Busca na web</h2>
+          <p class="muted">Sem isto, o agente pesquisa abrindo um buscador numa aba e lendo a página inteira, o que custa dezenas de milhares de tokens e mexe nas suas abas. Com um provedor configurado, a consulta sai por HTTP e volta como uma lista curta de resultados.</p>
+        </div>
+        <div class="card">
+          <div class="grid2">
+            <label class="field">
+              <span>Provedor</span>
+              <select id="search-provider" class="input"></select>
+              <em class="tiny" id="search-hint"></em>
+            </label>
+            <label class="field">
+              <span>Resultados por busca <b id="search-max-val">5</b></span>
+              <input id="search-max" type="range" min="1" max="15" step="1" value="5">
+              <em class="tiny">Mais resultados custam mais contexto.</em>
+            </label>
+          </div>
+          <label class="field" id="search-baseurl-row" hidden>
+            <span>Endereço da instância</span>
+            <input id="search-baseurl" class="input" type="url" placeholder="http://localhost:8080" spellcheck="false">
+            <em class="tiny">Na sua instância do SearXNG, ligue o JSON em <code>settings.yml</code> (<code>search.formats: [html, json]</code>) e desligue o <code>server.limiter</code>. Instâncias públicas não funcionam como API.</em>
+          </label>
+          <label class="field" id="search-apikey-row" hidden>
+            <span>Chave da API</span>
+            <input id="search-apikey" class="input" type="password" placeholder="cole a chave" spellcheck="false" autocomplete="off">
+            <em class="tiny">Guardada só neste navegador, como as outras chaves.</em>
+          </label>
+          <label class="field" id="search-conn-row" hidden>
+            <span>Conexão do OpenRouter</span>
+            <select id="search-conn" class="input"></select>
+            <em class="tiny">A busca é cobrada por consulta, além dos tokens do modelo.</em>
+          </label>
+          <div class="toggle-row">
+            <div><b>Permitir ler uma página sem abrir aba</b><div class="tiny">Ferramenta <code>fetch_url</code>: busca o texto de um endereço direto, sem sessão e sem cookies. Não precisa de chave nenhuma e funciona mesmo com a busca desligada.</div></div>
+            <label class="switch"><input id="search-fetchurl" type="checkbox"><span class="track"></span></label>
+          </div>
+          <div class="row">
+            <button id="search-test" class="btn">Testar busca</button>
+            <span id="search-test-out" class="tiny"></span>
+          </div>
+          <p class="tiny">A lista de sites bloqueados de <b>Agente</b> também vale aqui: resultados nesses domínios são omitidos e <code>fetch_url</code> recusa lê-los.</p>
         </div>
       </section>
 

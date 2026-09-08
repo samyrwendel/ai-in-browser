@@ -36,6 +36,9 @@ CONVERSA COM CONTEXTO DA PÁGINA
 • Resuma qualquer página pelo menu de contexto.
 • Anexe imagens e arquivos de texto, cole prints ou capture a aba.
 
+BUSCA NA WEB SEM DEPENDER DE NINGUÉM
+O agente pesquisa por API e lê páginas sem abrir abas. Você escolhe por onde: uma instância própria do SearXNG (sem chave e sem terceiros), o plugin de busca do OpenRouter, Exa ou Tavily. Com SearXNG e um modelo local, a extensão inteira funciona sem tocar em nenhum serviço externo.
+
 MODO NAVEGAR: O AGENTE FAZ POR VOCÊ
 Ative o modo Navegar e descreva a tarefa em português. O agente enxerga os elementos da página, clica, digita, seleciona opções, rola, abre e troca abas, espera carregamentos, lê o HTML e o código-fonte, consulta console e requisições de rede e tira capturas de tela quando o modelo tem visão.
 

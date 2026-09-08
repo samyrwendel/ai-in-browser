@@ -4,6 +4,32 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.4] — 2026-09-08
+
+### Adicionado
+- **Busca na web por API.** O agente ganhou a ferramenta `web_search`, que faz
+  a consulta por HTTP e recebe uma lista curta de título, endereço e trecho.
+  Antes, pesquisar significava abrir um buscador numa aba e ler a página
+  inteira: uma pesquisa no Google custava perto de trinta mil tokens e mexia
+  nas abas do usuário. Quatro provedores, em Configurações → Busca na web:
+  **SearXNG** na sua própria instância, sem chave e sem terceiros;
+  **OpenRouter**, pelo plugin `web` da conexão que você já tem; **Exa** e
+  **Tavily**, com chave própria. O botão *Testar busca* faz a consulta de
+  verdade, pelo mesmo caminho do agente.
+- **`fetch_url`: ler uma página sem abrir aba.** Não precisa de chave nenhuma
+  e funciona mesmo com a busca desligada. A leitura é anônima, sem cookies e
+  sem sessão: página que exige login continua sendo trabalho do modo Navegar,
+  na aba real do usuário.
+- A orientação do agente passa a mandar buscar antes de abrir aba, e abrir aba
+  só quando for preciso agir na página ou quando ela depender do login. Sem
+  provedor configurado, ele é avisado de que não tem busca e volta ao caminho
+  antigo.
+
+### Segurança
+- A lista de sites bloqueados vale para as duas ferramentas novas: resultados
+  em domínios bloqueados são omitidos da busca, e `fetch_url` recusa lê-los,
+  inclusive quando o bloqueio só aparece depois de um redirecionamento.
+
 ## [1.0.3] — 2026-09-08
 
 Correções encontradas testando a extensão no Chrome de verdade, depois que a

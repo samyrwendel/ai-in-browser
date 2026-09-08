@@ -3,6 +3,7 @@ import * as S from './lib/storage.js';
 import * as P from './lib/providers.js';
 import * as PERM from './lib/perms.js';
 import * as R from './lib/roles.js';
+import * as WS from './lib/search.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -332,6 +333,8 @@ function bindGeneral() {
     $('#steps-val').textContent = agSteps.value;
     save();
   });
+  bindSearch();
+
   const agBlocked = $('#agent-blocked');
   agBlocked.value = (ag.blockedDomains || []).join('\n');
   agBlocked.addEventListener('input', () => {
@@ -753,3 +756,104 @@ init().catch((e) => {
   console.error(e);
   toast('Erro ao carregar: ' + (e?.message || e), 'err', 6000);
 });
+
+
+// ---------- busca na web ----------
+
+function bindSearch() {
+  const sel = $('#search-provider');
+  if (!sel) return;
+  const cfg = (settings.search = { ...WS.DEFAULT_SEARCH, ...(settings.search || {}) });
+
+  sel.innerHTML = WS.SEARCH_PROVIDERS.map((p) => `<option value="${esc(p.id)}">${esc(p.label)}</option>`).join('');
+  sel.value = WS.providerInfo(cfg.provider).id;
+
+  const base = $('#search-baseurl');
+  const key = $('#search-apikey');
+  const conn = $('#search-conn');
+  const max = $('#search-max');
+  const fetchToggle = $('#search-fetchurl');
+
+  base.value = cfg.baseUrl || '';
+  key.value = cfg.apiKey || '';
+  max.value = cfg.maxResults || 5;
+  $('#search-max-val').textContent = max.value;
+  fetchToggle.checked = cfg.fetchUrl !== false;
+
+  function pintaCampos() {
+    const info = WS.providerInfo(cfg.provider);
+    $('#search-hint').textContent = info.hint || '';
+    $('#search-baseurl-row').hidden = !info.needs.includes('baseUrl');
+    $('#search-apikey-row').hidden = !info.needs.includes('apiKey');
+    $('#search-conn-row').hidden = !info.needs.includes('connection');
+    if (info.placeholder) base.placeholder = info.placeholder;
+    const ors = (settings.connections || []).filter((c) => c.type === 'openrouter');
+    conn.innerHTML = ors.length
+      ? ors.map((c) => `<option value="${esc(c.id)}">${esc(c.name || 'OpenRouter')}</option>`).join('')
+      : '<option value="">nenhuma conexão OpenRouter configurada</option>';
+    if (ors.length && !ors.some((c) => c.id === cfg.connectionId)) cfg.connectionId = ors[0].id;
+    conn.value = cfg.connectionId || '';
+    const falta = WS.missingFields(cfg);
+    $('#search-test').disabled = cfg.provider === 'none' || falta.length > 0;
+  }
+
+  sel.addEventListener('change', () => {
+    cfg.provider = sel.value;
+    pintaCampos();
+    save();
+  });
+  base.addEventListener('input', () => {
+    cfg.baseUrl = base.value.trim();
+    pintaCampos();
+    save();
+  });
+  key.addEventListener('input', () => {
+    cfg.apiKey = key.value.trim();
+    pintaCampos();
+    save();
+  });
+  conn.addEventListener('change', () => {
+    cfg.connectionId = conn.value;
+    pintaCampos();
+    save();
+  });
+  max.addEventListener('input', () => {
+    cfg.maxResults = Number(max.value);
+    $('#search-max-val').textContent = max.value;
+    save();
+  });
+  fetchToggle.addEventListener('change', () => {
+    cfg.fetchUrl = fetchToggle.checked;
+    save();
+  });
+
+  // O teste faz a consulta de verdade, pelo mesmo caminho do agente. Um teste
+  // que só confere a configuração mentiria, como já aconteceu com o Ollama.
+  const btn = $('#search-test');
+  const out = $('#search-test-out');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const antes = btn.textContent;
+    btn.textContent = 'Buscando…';
+    out.textContent = '';
+    out.className = 'tiny';
+    try {
+      const c = (settings.connections || []).find((x) => x.id === cfg.connectionId) || null;
+      const r = await WS.search(cfg, 'teste de conexão', { maxResults: 3, conn: c });
+      if (!r.results.length) {
+        out.textContent = 'Respondeu, mas sem resultados. Confira a configuração do provedor.';
+        out.className = 'tiny warn';
+      } else {
+        out.textContent = `${r.results.length} resultado(s) via ${r.label}. Primeiro: ${r.results[0].title}`;
+        out.className = 'tiny ok';
+      }
+    } catch (e) {
+      out.textContent = String(e?.message || e);
+      out.className = 'tiny err';
+    }
+    btn.disabled = false;
+    btn.textContent = antes;
+  });
+
+  pintaCampos();
+}

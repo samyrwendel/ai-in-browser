@@ -114,7 +114,6 @@ lib/storage.js     armazenamento
 
 | Permissão | Quando é pedida | Se você recusar |
 |---|---|---|
-| `audioCapture` | No primeiro clique no microfone | O ditado por voz não funciona; dá para conceder depois em Configurações |
 | `history` | Ao ligar "Permitir histórico e downloads" | A ferramenta de busca no histórico não aparece para o modelo |
 | `downloads` | Idem | A ferramenta de download não aparece para o modelo |
 

@@ -65,7 +65,6 @@ escolhido. Consulte a política de quem você usar, por exemplo
 | `declarativeNetRequestWithHostAccess` | Remover o cabeçalho `Origin` apenas das requisições da própria extensão para os servidores de modelos locais ou personalizados que você configurou, para que aceitem a conexão sem configuração extra. Não altera requisições de sites |
 | `host_permissions: <all_urls>` | Falar com a API do provedor que você configurar (inclusive `localhost`) e atuar na aba que você indicar |
 | `debugger` | Cliques e teclas confiáveis, captura de página inteira, console, rede e código-fonte durante tarefas do modo Navegar. Só é anexada à aba enquanto uma tarefa pedida por você roda, e é liberada ao terminar. Pode ser desligada em Configurações → Agente |
-| `audioCapture` *(opcional)* | Ditado por voz. Pedida só quando você clica no microfone. O áudio é transcrito pelo serviço de reconhecimento de voz do navegador e nunca é enviado ao provedor de IA; só o texto vai |
 | `history` *(opcional)* | Ferramenta de busca no histórico. Desligada por padrão |
 | `downloads` *(opcional)* | Ferramenta de download de arquivos. Desligada por padrão |
 

@@ -364,7 +364,6 @@ function bindGeneral() {
       const prev = micBtn.textContent;
       micBtn.textContent = 'Testando…';
       try {
-        if (S.HAS_CHROME && chrome.permissions) await PERM.request(['audioCapture']);
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach((t) => t.stop());
         toast('Microfone liberado. O ditado por voz já funciona no painel.', 'ok', 4000);

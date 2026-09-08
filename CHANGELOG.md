@@ -9,6 +9,15 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
 
 ### Corrigido
+- **`audioCapture` era uma permissão inválida.** O Chrome recusava a
+  declaração com *"'audioCapture' is only allowed for packaged apps"*, então
+  ela era descartada do manifest e o pedido em tempo de execução falhava com
+  *"Only permissions specified in the manifest may be requested"*, poluindo a
+  página de erros da extensão. Ela nunca foi necessária: o ditado usa o
+  reconhecimento de fala do próprio navegador, que pede o microfone pelo
+  diálogo padrão do Chrome. A permissão foi removida do manifest, do módulo
+  de permissões, da página de configurações e das justificativas da loja.
+  Restam duas opcionais, `history` e `downloads`.
 - **O agente inventava dados que mudam com o tempo.** Ao preencher um campo
   com "a cotação do dólar hoje", o modelo escreveu um valor tirado da memória
   do treinamento, sem fazer nenhuma consulta, e ainda listou o valor na

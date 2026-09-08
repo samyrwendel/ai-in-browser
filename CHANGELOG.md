@@ -4,6 +4,20 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.6] — 2026-09-08
+
+### Corrigido
+- **Erros de provedor apontavam o vendedor errado.** Quem usa um endpoint
+  compatível — a MiniMax pela API da Anthropic, por exemplo — recebia
+  "Créditos insuficientes em Anthropic. Adicione saldo na sua conta" quando
+  quem tinha recusado era a MiniMax. Agora, quando a URL base não é o host
+  oficial do tipo da conexão, o host entra na mensagem: *"Créditos
+  insuficientes em Anthropic (api.minimax.io)"*. Vale para 401, 402, 404, 429
+  e erros 5xx.
+- A mensagem de saldo passa a lembrar de conferir se a chave é a do plano
+  certo, que é a causa comum quando o provedor tem plano por assinatura e
+  chave separada para pagamento por uso.
+
 ## [1.0.5] — 2026-09-08
 
 ### Corrigido

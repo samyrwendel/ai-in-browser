@@ -9,6 +9,15 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 Auditoria de segurança e privacidade antes do envio à Chrome Web Store.
 
 ### Corrigido
+- **Nenhuma resposta aparecia.** Uma variável usada antes de existir derrubava
+  a função que cria a mensagem do assistente, e o envio falhava em silêncio com
+  qualquer modelo e qualquer provedor.
+- **O microfone dava erro em vez de pedir autorização.** O Chrome nunca exibe
+  o diálogo do microfone dentro do painel lateral, e o botão tratava a recusa
+  do pedido como falha definitiva. Agora ele consulta o estado da permissão
+  antes: se já estiver concedida, dita na hora; se não, explica que a
+  liberação precisa acontecer fora do painel e abre Configurações →
+  Comportamento, onde "Testar microfone" faz o Chrome perguntar.
 - O agente podia ficar preso para sempre numa tarefa de visão. As chamadas ao
   modelo que descreve imagens não tinham prazo, e na descrição de anexos elas
   nem recebiam o sinal de cancelamento, então o botão Parar não as alcançava.

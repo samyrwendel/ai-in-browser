@@ -1035,6 +1035,7 @@ async function runAgentTask(text, ctx, userMsg) {
   let attachedNote = '';
   // a descrição do anexo acontece antes do agente existir: um controlador
   // próprio garante que o botão Parar interrompa também essa fase
+  const node = appendMessage(msg);
   const pre = new AbortController();
   state.streaming = { abort: pre, msg, node };
   setSendState();
@@ -1070,7 +1071,6 @@ async function runAgentTask(text, ctx, userMsg) {
       : `\n\n[O usuário anexou ${userMsg.images.length} imagem(ns), mas nenhum modelo com visão está ativo para descrevê-las. Diga isso a ele; não use screenshot como substituto.]`;
   }
   state.chat.messages.push(msg);
-  const node = appendMessage(msg);
   const perms = await PERM.granted();
   const useDebugger = s.agent?.useDebugger !== false && perms.debugger !== false;
   const browser = createBrowser({ useDebugger, blockedDomains: s.agent?.blockedDomains || [], log: (m) => console.debug('[agent]', m) });
@@ -1175,6 +1175,17 @@ function renderEffortMenu() {
 
 // ---------- voz ----------
 
+// 'granted' | 'denied' | 'prompt' | null (navegador sem a consulta)
+async function micPermissionState() {
+  try {
+    if (!navigator.permissions?.query) return null;
+    const st = await navigator.permissions.query({ name: 'microphone' });
+    return st.state;
+  } catch {
+    return null;
+  }
+}
+
 function stopMic() {
   if (state.rec) {
     try {
@@ -1206,7 +1217,12 @@ function startDictation() {
     setSendState();
   };
   rec.onerror = (e) => {
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('O Chrome bloqueou o microfone. Abra as configurações da extensão e use "Testar microfone" para conceder a permissão.', 'err', 7000);
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      // o diálogo de microfone não aparece no painel lateral: leva às configurações,
+      // que abrem numa aba comum, onde o Chrome mostra o pedido normalmente
+      toast('O Chrome não pede o microfone dentro do painel. Abrindo as configurações: use "Testar microfone" para conceder.', 'err', 8000);
+      setTimeout(() => openOptionsAt('#behavior'), 900);
+    }
     else if (e.error !== 'aborted' && e.error !== 'no-speech') toast('Erro no reconhecimento de voz: ' + e.error, 'err');
     stopMic();
   };
@@ -2082,17 +2098,15 @@ function bindEvents() {
   document.addEventListener('click', (e) => {
     if (!els.effortMenu.classList.contains('hidden') && !e.target.closest('#effort-menu') && !e.target.closest('#btn-effort')) els.effortMenu.classList.add('hidden');
   });
-  els.btnMic.addEventListener('click', () => {
+  els.btnMic.addEventListener('click', async () => {
     if (state.rec) return stopMic();
-    // permissions.request precisa do gesto do clique: chamada antes de qualquer await
-    if (S.HAS_CHROME && chrome.permissions) {
-      PERM.request(['audioCapture']).then((ok) => {
-        if (ok) startDictation();
-        else toast('Sem permissão de microfone o ditado não funciona. Você pode conceder depois em Configurações.', 'err', 5000);
-      });
-      return;
-    }
-    startDictation();
+    // O Chrome não exibe o pedido de microfone dentro do painel lateral. Em vez
+    // de tentar e falhar, consulta o estado: se ainda não foi concedido, leva
+    // direto às configurações, que abrem numa aba comum, onde o diálogo aparece.
+    const estado = await micPermissionState();
+    if (estado === 'granted' || estado === null) return startDictation();
+    toast('O Chrome só pede o microfone fora do painel. Abrindo as configurações: clique em "Testar microfone" para liberar.', '', 7000);
+    openOptionsAt('#behavior');
   });
   els.btnCoop.addEventListener('click', async (e) => {
     e.stopPropagation();

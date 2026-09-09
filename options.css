@@ -50,6 +50,9 @@ body { overflow: auto; }
 }
 .card-head { display: flex; align-items: center; gap: 10px; }
 
+.check-inline { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--text-2); font-weight: 400; cursor: pointer; margin-top: 2px; }
+.check-inline input { margin-top: 2px; flex: none; }
+.check-inline .warn-inline { color: var(--text-3); font-weight: 400; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field > span { font-size: 12.5px; font-weight: 600; color: var(--text-2); display: flex; justify-content: space-between; }
 .field > span b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }

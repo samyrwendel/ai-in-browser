@@ -274,6 +274,7 @@ async function selectModel(connId, modelId) {
   }
   updateHeader();
   closePicker();
+  if (state.settings.browseMode) renderNavModelLabel();
   refreshCoop();
 }
 
@@ -1166,8 +1167,70 @@ function applyBrowseMode() {
   const on = !!state.settings.browseMode;
   els.btnBrowse.classList.toggle('on', on);
   els.app.classList.toggle('browse', on);
+  els.btnNavModel.classList.toggle('hidden', !on); // só faz sentido no modo Navegar
   els.input.placeholder = defaultPlaceholder();
+  if (on) renderNavModelLabel();
   updateHeader();
+}
+
+// ---------- modelo do Navegar (atalho para o papel 'agent' da cooperação) ----------
+// "Mesmo do chat" = papel desligado (o principal conduz). "Automático" = a
+// cooperação preenche a lacuna se o principal não tiver tool calling. Um modelo
+// específico = papel fixado. É a mesma configuração de Configurações →
+// Cooperação, exposta aqui para a decisão que muda a cada tarefa.
+
+function navRoleCfg() {
+  return { ...R.DEFAULT_ROLES.agent, ...((state.settings.roles || {}).agent || {}) };
+}
+
+function navModelText() {
+  const cfg = navRoleCfg();
+  if (cfg.mode === 'off') return 'mesmo do chat';
+  if (cfg.mode === 'pinned' && cfg.connectionId && cfg.modelId) {
+    const m = (state.models[cfg.connectionId] || []).find((x) => x.id === cfg.modelId);
+    return displayName(m || { id: cfg.modelId });
+  }
+  return 'automático';
+}
+
+function renderNavModelLabel() {
+  els.navModelLabel.textContent = 'Navegar com: ' + navModelText();
+}
+
+async function setNavRole(patch) {
+  state.settings.roles = state.settings.roles || {};
+  state.settings.roles.agent = { ...R.DEFAULT_ROLES.agent, ...(state.settings.roles.agent || {}), ...patch };
+  await saveSettings();
+  renderNavModelLabel();
+  refreshCoop(true);
+}
+
+async function renderNavModelMenu() {
+  const cfg = navRoleCfg();
+  const mb = await modelsForRoles();
+  const cur = mainSel();
+  // candidatos: modelos com tool calling entre as conexões ativas, exceto o
+  // próprio principal (para ele há a opção "mesmo do chat")
+  const opts = [];
+  for (const c of visibleConnections()) {
+    for (const m of mb[c.id] || []) {
+      if (!R.capabilities(c, m).tools) continue;
+      if (c.id === cur.connectionId && m.id === cur.modelId) continue;
+      if (R.isRouter(m) || R.isNonInteractive(m)) continue;
+      opts.push({ connId: c.id, connName: c.name, modelId: m.id, name: displayName(m) });
+    }
+  }
+  const chk = (on) => on ? '<svg class="chev-sm nav-check"><use href="#i-check"/></svg>' : '';
+  const head = '<div class="coop-head"><span>Modelo do Navegar</span></div>';
+  const fixos =
+    `<button class="nav-opt" data-nav="off">${chk(cfg.mode === 'off')}<span class="lbl">Mesmo do chat</span><small>o modelo selecionado conduz</small></button>` +
+    `<button class="nav-opt" data-nav="auto">${chk(cfg.mode === 'auto')}<span class="lbl">Automático</span><small>um ajudante assume se o principal não tiver ferramentas</small></button>`;
+  const lista = opts.length
+    ? '<div class="nav-sep">Fixar um modelo</div>' + opts
+        .map((o) => `<button class="nav-opt" data-nav="pin" data-conn="${esc(o.connId)}" data-model="${esc(o.modelId)}">${chk(cfg.mode === 'pinned' && cfg.connectionId === o.connId && cfg.modelId === o.modelId)}<span class="lbl">${esc(o.name)}</span><small>${esc(o.connName)}</small></button>`)
+        .join('')
+    : '';
+  els.navModelMenu.innerHTML = head + fixos + lista;
 }
 
 function renderEffortMenu() {
@@ -2111,6 +2174,27 @@ function bindEvents() {
     toast('O Chrome só pede o microfone fora do painel. Abrindo as configurações: clique em "Testar microfone" para liberar.', '', 7000);
     openOptionsAt('#behavior');
   });
+  els.btnNavModel.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!els.navModelMenu.classList.contains('hidden')) return els.navModelMenu.classList.add('hidden');
+    els.effortMenu.classList.add('hidden');
+    els.coopMenu.classList.add('hidden');
+    els.navModelMenu.innerHTML = '<div class="coop-head"><span>Modelo do Navegar</span><b>carregando…</b></div>';
+    els.navModelMenu.classList.remove('hidden');
+    await renderNavModelMenu();
+  });
+  els.navModelMenu.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-nav]');
+    if (!b) return;
+    const mode = b.dataset.nav;
+    if (mode === 'off') await setNavRole({ mode: 'off' });
+    else if (mode === 'auto') await setNavRole({ mode: 'auto' });
+    else if (mode === 'pin') await setNavRole({ mode: 'pinned', connectionId: b.dataset.conn, modelId: b.dataset.model });
+    els.navModelMenu.classList.add('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!els.navModelMenu.classList.contains('hidden') && !e.target.closest('#nav-model-menu') && !e.target.closest('#btn-nav-model')) els.navModelMenu.classList.add('hidden');
+  });
   els.btnCoop.addEventListener('click', async (e) => {
     e.stopPropagation();
     if (!els.coopMenu.classList.contains('hidden')) return els.coopMenu.classList.add('hidden');
@@ -2207,6 +2291,9 @@ async function init() {
     btnAttach: $('#btn-attach'),
     fileInput: $('#file-input'),
     btnBrowse: $('#btn-browse'),
+    btnNavModel: $('#btn-nav-model'),
+    navModelLabel: $('#nav-model-label'),
+    navModelMenu: $('#nav-model-menu'),
     btnEffort: $('#btn-effort'),
     effortLabel: $('#effort-label'),
     effortMenu: $('#effort-menu'),

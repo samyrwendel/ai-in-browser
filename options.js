@@ -326,11 +326,25 @@ function bindGeneral() {
     save();
   });
   const agSteps = $('#agent-steps');
+  const agUnlimited = $('#agent-steps-unlimited');
+  const paintSteps = () => {
+    const semLimite = ag.maxSteps === 0;
+    agUnlimited.checked = semLimite;
+    agSteps.disabled = semLimite;
+    agSteps.value = semLimite ? agSteps.value : (ag.maxSteps || 25);
+    $('#steps-val').textContent = semLimite ? 'sem limite' : agSteps.value;
+  };
   agSteps.value = ag.maxSteps || 25;
-  $('#steps-val').textContent = agSteps.value;
+  paintSteps();
   agSteps.addEventListener('input', () => {
     ag.maxSteps = Number(agSteps.value);
     $('#steps-val').textContent = agSteps.value;
+    save();
+  });
+  agUnlimited.addEventListener('change', () => {
+    // 0 = sem limite; ao religar o limite, volta ao valor do controle deslizante
+    ag.maxSteps = agUnlimited.checked ? 0 : Number(agSteps.value) || 25;
+    paintSteps();
     save();
   });
   bindSearch();
@@ -497,7 +511,9 @@ function bindGeneralValues() {
   $('#agent-debugger').checked = ag.useDebugger !== false;
   $('#agent-screenshots').checked = ag.screenshots !== false;
   $('#agent-steps').value = ag.maxSteps || 25;
-  $('#steps-val').textContent = ag.maxSteps || 25;
+  $('#agent-steps-unlimited').checked = ag.maxSteps === 0;
+  $('#agent-steps').disabled = ag.maxSteps === 0;
+  $('#steps-val').textContent = ag.maxSteps === 0 ? 'sem limite' : (ag.maxSteps || 25);
   $('#agent-js').checked = ag.allowJs !== false;
   $('#agent-blocked').value = (ag.blockedDomains || []).join('\n');
   $('#agent-prompt').value = ag.systemPrompt || '';

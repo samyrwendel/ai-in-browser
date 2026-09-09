@@ -626,6 +626,17 @@
 .coop-btn.on { color: var(--text); }
 .coop-btn.on svg { color: var(--accent-2); }
 .coop-count { font-size: 10px; font-weight: 700; padding: 0 5px; border-radius: 999px; background: rgba(var(--accent-2-rgb), .18); color: var(--accent-2); border: 1px solid rgba(var(--accent-2-rgb), .35); line-height: 15px; }
+.nav-model { max-width: 190px; }
+.nav-model .nav-model-label, .nav-model #nav-model-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-model .chev-sm { width: 12px; height: 12px; flex: none; opacity: .6; }
+.nav-model-menu { position: absolute; left: 12px; right: auto; bottom: 74px; top: auto; min-width: 240px; max-width: calc(100% - 24px); padding: 8px; max-height: 360px; overflow-y: auto; }
+.nav-model-menu .coop-head { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); padding: 4px 8px 8px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.nav-model-menu .nav-sep { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); padding: 8px 8px 4px; border-top: 1px solid var(--border); margin-top: 4px; }
+.nav-opt { display: grid; grid-template-columns: 16px 1fr; align-items: center; gap: 2px 8px; width: 100%; padding: 7px 8px; border: 0; background: none; border-radius: 8px; text-align: left; cursor: pointer; color: var(--text); }
+.nav-opt:hover { background: var(--surface-2); }
+.nav-opt .lbl { grid-column: 2; font-size: 13px; }
+.nav-opt small { grid-column: 2; font-size: 11px; color: var(--text-3); }
+.nav-opt .nav-check { grid-column: 1; grid-row: 1 / span 2; width: 15px; height: 15px; color: var(--accent); }
 .coop-menu { position: absolute; left: 12px; right: auto; bottom: 74px; top: auto; min-width: 280px; max-width: calc(100% - 24px); padding: 8px; }
 .coop-menu .coop-head { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); padding: 4px 8px 8px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
 .coop-menu .coop-head b { color: var(--text-2); text-transform: none; letter-spacing: 0; font-weight: 600; }

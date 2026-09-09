@@ -4,6 +4,23 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.10] — 2026-09-08
+
+### Adicionado
+- **Desligar o limite de ações por tarefa.** Em Configurações → Agente, o
+  controle de máximo de ações ganhou a opção *Sem limite*. Com ela, o agente
+  roda até concluir a tarefa ou até você clicar em Parar, sem o teto de 25
+  ações. A tela avisa do risco: sem o teto, um laço com um modelo pago pode
+  gastar muito, e só o botão Parar interrompe. O padrão continua 25.
+- **Escolher o modelo do Navegar sem sair do chat.** Com o modo Navegar
+  ligado, um botão *"Navegar com:"* aparece ao lado do botão Navegar. Ele
+  alterna entre *Mesmo do chat* (o modelo selecionado conduz), *Automático*
+  (um ajudante assume só se o principal não tiver tool calling) e fixar um
+  modelo específico entre as conexões ativas. É a mesma configuração de
+  Configurações → Cooperação, exposta onde a decisão costuma mudar: a cada
+  tarefa. Antes, para impedir a cooperação de trocar o modelo era preciso
+  abrir as Configurações.
+
 ## [1.0.9] — 2026-09-08
 
 ### Corrigido

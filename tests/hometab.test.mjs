@@ -45,5 +45,12 @@ ok(!toolsFor({ webSearch: false }).some((t) => t.name === 'web_search'), 'web_se
 ok(toolsFor({}).some((t) => t.name === 'fetch_url'), 'fetch_url vem ligada por padrão');
 ok(!toolsFor({ fetchUrl: false }).some((t) => t.name === 'fetch_url'), 'fetch_url some quando desligada');
 
+// orçamento de passos no prompt
+const comTeto = buildSystemPrompt({ maxSteps: 25, jsonMode: false, tools: [], userSystem: '', tabInfo: null, homeTab: null, vision: true });
+const semTeto = buildSystemPrompt({ maxSteps: 0, jsonMode: false, tools: [], userSystem: '', tabInfo: null, homeTab: null, vision: true });
+ok(/at most 25 tool calls/.test(comTeto), 'com teto: informa o máximo de ações');
+ok(!/at most/.test(semTeto), 'sem teto: não informa um máximo');
+ok(/no fixed limit on tool calls/.test(semTeto), 'sem teto: diz que não há limite fixo, mas pede eficiência');
+
 console.log(fails ? `\n${fails} falha(s)` : '\ntudo certo');
 process.exit(fails ? 1 : 0);

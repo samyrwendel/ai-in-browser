@@ -4,6 +4,22 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.9] — 2026-09-08
+
+### Corrigido
+- **A cooperação trocava o modelo escolhido num gateway de nuvem.** Ao usar um
+  endpoint compatível com um modelo de nome próprio — o `drael-v1` do
+  drael.sh, por exemplo — o modo Navegar era assumido por outro modelo, e não
+  pelo escolhido. A extensão decidia se um modelo tem tool calling pelo nome,
+  contra uma lista de famílias conhecidas; um nome fora da lista era julgado
+  "sem ferramentas", então a cooperação delegava a navegação a um ajudante. O
+  nome sozinho não distingue um gateway remoto pago (que quase sempre suporta)
+  de um modelo local pequeno (que muitas vezes não). Agora endpoints remotos
+  personalizados são assumidos com tool calling; se o servidor recusar, o
+  agente cai sozinho para o protocolo JSON. Servidores locais (Ollama, LM
+  Studio) continuam sendo julgados pelo nome, onde ele ainda é o melhor
+  palpite. Sem o modo Navegar, o modelo escolhido já respondia normalmente.
+
 ## [1.0.8] — 2026-09-08
 
 ### Corrigido

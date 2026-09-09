@@ -19,6 +19,7 @@ const state = {
   chats: [],
   chat: null,
   models: {},
+  modelLoads: {}, // promessas de carga em andamento, por conexão (dedupe)
   modelStatus: {},
   modelError: {},
   localDetected: {},
@@ -164,36 +165,55 @@ async function ensureModels(connId, { force = false } = {}) {
   const c = conn(connId);
   if (!c) return [];
   if (!force && state.models[connId]?.length) return state.models[connId];
-  if (!force) {
-    const cache = await S.getModelCache();
-    const hit = cache[connId];
-    if (hit && hit.models?.length && Date.now() - hit.ts < MODEL_CACHE_TTL) {
-      state.models[connId] = hit.models;
-      state.modelStatus[connId] = 'ok';
-      if (c.local) state.localDetected[connId] = true;
-      return hit.models;
-    }
-  }
-  if (c.local && !force && !state.localDetected[connId] && state.modelStatus[connId] === 'off') return [];
-  state.modelStatus[connId] = 'loading';
-  try {
-    const models = await P.fetchModels(c, { timeoutMs: P.modelsTimeout(c) });
-    state.models[connId] = models;
+
+  // Semeia com o cache, mesmo vencido: é melhor mostrar a última lista conhecida
+  // do que uma lista vazia enquanto recarrega (ou se a recarga falhar).
+  const cache = await S.getModelCache();
+  const hit = cache[connId];
+  const fresco = hit && hit.models?.length && Date.now() - hit.ts < MODEL_CACHE_TTL;
+  if (hit?.models?.length && !state.models[connId]?.length) {
+    state.models[connId] = hit.models;
     state.modelStatus[connId] = 'ok';
-    state.modelError[connId] = '';
-    if (c.local) state.localDetected[connId] = models.length > 0;
-    await S.setModelCache(connId, models);
-    return models;
-  } catch (e) {
-    const localDeVerdade = c.local && P.isLoopbackUrl(c.baseUrl);
-    state.modelStatus[connId] = localDeVerdade ? 'off' : 'error';
-    state.modelError[connId] = P.networkErrorMessage(e, c) || 'Falha ao carregar';
-    if (c.local) state.localDetected[connId] = localDeVerdade ? false : true;
-    if (!c.local && P.FALLBACK_MODELS[c.type] && !state.models[connId]?.length) {
-      state.models[connId] = P.FALLBACK_MODELS[c.type];
-    }
-    return state.models[connId] || [];
+    if (c.local) state.localDetected[connId] = true;
   }
+  if (!force && fresco) return state.models[connId];
+  // local nunca detectado e sem cache: não fica sondando toda hora
+  if (c.local && !force && !state.localDetected[connId] && state.modelStatus[connId] === 'off' && !hit?.models?.length) return [];
+
+  // Uma carga por conexão de cada vez: chamadas concorrentes compartilham a mesma
+  // promessa, senão duas renderizações se atropelam e a lista pisca vazia.
+  if (!force && state.modelLoads[connId]) return state.modelLoads[connId];
+
+  const p = (async () => {
+    state.modelStatus[connId] = state.models[connId]?.length ? 'ok' : 'loading';
+    try {
+      const models = await P.fetchModels(c, { timeoutMs: P.modelsTimeout(c) });
+      state.models[connId] = models;
+      state.modelStatus[connId] = 'ok';
+      state.modelError[connId] = '';
+      if (c.local) state.localDetected[connId] = models.length > 0;
+      await S.setModelCache(connId, models);
+      return models;
+    } catch (e) {
+      const localDeVerdade = c.local && P.isLoopbackUrl(c.baseUrl);
+      state.modelError[connId] = P.networkErrorMessage(e, c) || 'Falha ao carregar';
+      // Recarga falhou: se já havia uma lista (cache/estado), mantém e segue "ok".
+      // Só marca erro/vazio quando não há nada para mostrar.
+      if (state.models[connId]?.length) {
+        state.modelStatus[connId] = 'ok';
+        if (c.local) state.localDetected[connId] = true;
+      } else {
+        state.modelStatus[connId] = localDeVerdade ? 'off' : 'error';
+        if (c.local) state.localDetected[connId] = localDeVerdade ? false : true;
+        if (!c.local && P.FALLBACK_MODELS[c.type]) state.models[connId] = P.FALLBACK_MODELS[c.type];
+      }
+      return state.models[connId] || [];
+    } finally {
+      delete state.modelLoads[connId];
+    }
+  })();
+  state.modelLoads[connId] = p;
+  return p;
 }
 
 async function detectLocal({ force = false } = {}) {
@@ -1183,18 +1203,36 @@ function navRoleCfg() {
   return { ...R.DEFAULT_ROLES.agent, ...((state.settings.roles || {}).agent || {}) };
 }
 
-function navModelText() {
+// Rótulo curto do botão. No automático mostra o modelo que seria escolhido de
+// fato (o principal, se ele já tiver ferramentas, ou o ajudante), não a palavra
+// "automático" — era o que não estava intuitivo.
+async function navModelText() {
   const cfg = navRoleCfg();
-  if (cfg.mode === 'off') return 'mesmo do chat';
+  if (cfg.mode === 'off') return { label: 'chat', title: 'O modelo selecionado no chat conduz o Navegar.' };
   if (cfg.mode === 'pinned' && cfg.connectionId && cfg.modelId) {
     const m = (state.models[cfg.connectionId] || []).find((x) => x.id === cfg.modelId);
-    return displayName(m || { id: cfg.modelId });
+    const nome = displayName(m || { id: cfg.modelId });
+    return { label: nome, title: `Navegar fixado em ${nome}.` };
   }
-  return 'automático';
+  // automático: resolve para saber quem assume
+  try {
+    const mb = await modelsForRoles();
+    const r = R.resolveRole('agent', { ...state.settings, roles: { ...(state.settings.roles || {}), agent: { ...navRoleCfg(), mode: 'auto' } } }, mb, mainSel());
+    if (!r) return { label: 'chat', title: 'Nenhum modelo ativo com ferramentas; o modelo do chat tenta conduzir.' };
+    if (r.source === 'main') return { label: r.name, title: `Automático: o modelo do chat (${r.name}) já tem ferramentas e conduz.` };
+    return { label: r.name, title: `Automático: ${r.name} assume o Navegar porque o modelo do chat não tem ferramentas.` };
+  } catch {
+    return { label: 'automático', title: 'Automático' };
+  }
 }
 
-function renderNavModelLabel() {
-  els.navModelLabel.textContent = 'Navegar com: ' + navModelText();
+let navLabelSeq = 0;
+async function renderNavModelLabel() {
+  const seq = ++navLabelSeq;
+  const { label, title } = await navModelText();
+  if (seq !== navLabelSeq) return; // uma chamada mais nova assumiu; não sobrescreve
+  els.navModelLabel.textContent = label;
+  els.btnNavModel.title = `Modelo do Navegar — ${title} Clique para trocar.`;
 }
 
 async function setNavRole(patch) {
@@ -1221,16 +1259,28 @@ async function renderNavModelMenu() {
     }
   }
   const chk = (on) => on ? '<svg class="chev-sm nav-check"><use href="#i-check"/></svg>' : '';
+  const selCls = (on) => (on ? ' sel' : '');
   const head = '<div class="coop-head"><span>Modelo do Navegar</span></div>';
+  // resolve o que o automático escolheria agora, para mostrar no subtexto
+  let autoSub = 'um ajudante assume se o chat não tiver ferramentas';
+  const ar = R.resolveRole('agent', { ...state.settings, roles: { ...(state.settings.roles || {}), agent: { ...cfg, mode: 'auto' } } }, mb, cur);
+  if (ar && ar.source === 'main') autoSub = `o modelo do chat (${ar.name}) já cobre`;
+  else if (ar) autoSub = `usa ${ar.name}${ar.connectionName ? ' · ' + ar.connectionName : ''}`;
+  else autoSub = 'nenhum modelo ativo tem ferramentas';
+  const mainName = displayName((mb[cur.connectionId] || []).find((x) => x.id === cur.modelId) || { id: cur.modelId });
   const fixos =
-    `<button class="nav-opt" data-nav="off">${chk(cfg.mode === 'off')}<span class="lbl">Mesmo do chat</span><small>o modelo selecionado conduz</small></button>` +
-    `<button class="nav-opt" data-nav="auto">${chk(cfg.mode === 'auto')}<span class="lbl">Automático</span><small>um ajudante assume se o principal não tiver ferramentas</small></button>`;
+    `<button class="nav-opt${selCls(cfg.mode === 'off')}" data-nav="off">${chk(cfg.mode === 'off')}<span class="lbl">Mesmo do chat</span><small>${esc(mainName)} conduz</small></button>` +
+    `<button class="nav-opt${selCls(cfg.mode === 'auto')}" data-nav="auto">${chk(cfg.mode === 'auto')}<span class="lbl">Automático</span><small>${esc(autoSub)}</small></button>`;
   const lista = opts.length
     ? '<div class="nav-sep">Fixar um modelo</div>' + opts
-        .map((o) => `<button class="nav-opt" data-nav="pin" data-conn="${esc(o.connId)}" data-model="${esc(o.modelId)}">${chk(cfg.mode === 'pinned' && cfg.connectionId === o.connId && cfg.modelId === o.modelId)}<span class="lbl">${esc(o.name)}</span><small>${esc(o.connName)}</small></button>`)
+        .map((o) => { const on = cfg.mode === 'pinned' && cfg.connectionId === o.connId && cfg.modelId === o.modelId; return `<button class="nav-opt${selCls(on)}" data-nav="pin" data-conn="${esc(o.connId)}" data-model="${esc(o.modelId)}">${chk(on)}<span class="lbl">${esc(o.name)}</span><small>${esc(o.connName)}</small></button>`; })
         .join('')
     : '';
   els.navModelMenu.innerHTML = head + fixos + lista;
+  // deixa o item ativo visível: um pin fica abaixo da dobra e parecia que nada
+  // estava selecionado (ou que "Automático" estava)
+  const ativo = els.navModelMenu.querySelector('.nav-opt.sel');
+  if (ativo) ativo.scrollIntoView({ block: 'nearest' });
 }
 
 function renderEffortMenu() {
@@ -1548,7 +1598,13 @@ function modelItemHtml(c, m, selected, fav) {
   const meta = [];
   if (m.context) meta.push(`<span>${P.formatContext(m.context)} ctx</span>`);
   if (m.promptPrice != null) meta.push(m.free ? `<span class="free">grátis</span>` : `<span class="price">${P.formatPrice(m.promptPrice)} / ${P.formatPrice(m.completionPrice)}</span>`);
-  const vision = (m.modalities || []).includes('image') ? '<span class="tag vision">visão</span>' : '';
+  // etiquetas de capacidade: usa os dados reais (m.caps, do Ollama) quando há,
+  // senão as heurísticas de sempre
+  const tags = [];
+  if (P.modelSupportsVision(c, m)) tags.push('<span class="tag vision" title="enxerga imagens">👁️ visão</span>');
+  if (m.caps?.tools) tags.push('<span class="tag cap" title="usa ferramentas (modo Navegar)">🔧 ferramentas</span>');
+  if (m.caps?.reasoning) tags.push('<span class="tag cap" title="raciocínio passo a passo">🧠 raciocínio</span>');
+  const vision = tags.join('');
   const novo = c.type === 'openrouter' && P.isNew(m.created) ? `<span class="tag new" title="lançado ${esc(P.formatAge(m.created))}">novo</span>` : '';
   return `<div class="model-item${selected ? ' selected' : ''}" data-conn="${esc(c.id)}" data-model="${esc(m.id)}" role="button" tabindex="0">
     <span class="badge" style="background:${b.color};color:${/^#(f|e)/i.test(b.color) ? '#111' : '#fff'}">${b.letter}</span>
@@ -1923,11 +1979,9 @@ function bindEvents() {
   });
   els.pickerRefresh.addEventListener('click', async () => {
     els.pickerRefresh.disabled = true;
-    for (const c of visibleConnections()) {
-      delete state.models[c.id];
-      if (c.local) state.localDetected[c.id] = false;
-    }
-    await S.clearModelCache();
+    // não apaga a lista atual antes de recarregar: force:true já busca de novo e
+    // substitui no sucesso; se a recarga falhar, a lista anterior permanece em vez
+    // de a tela ficar vazia (era o "some e volta ao reabrir")
     await loadAllModels({ force: true });
     els.pickerRefresh.disabled = false;
     updateHeader();
@@ -2164,6 +2218,7 @@ function bindEvents() {
   document.addEventListener('click', (e) => {
     if (!els.effortMenu.classList.contains('hidden') && !e.target.closest('#effort-menu') && !e.target.closest('#btn-effort')) els.effortMenu.classList.add('hidden');
   });
+  els.btnSettings.addEventListener('click', () => openOptionsAt(''));
   els.btnMic.addEventListener('click', async () => {
     if (state.rec) return stopMic();
     // O Chrome não exibe o pedido de microfone dentro do painel lateral. Em vez
@@ -2174,6 +2229,23 @@ function bindEvents() {
     toast('O Chrome só pede o microfone fora do painel. Abrindo as configurações: clique em "Testar microfone" para liberar.', '', 7000);
     openOptionsAt('#behavior');
   });
+  // A fila de provedores rola na horizontal. Touchpad faz isso com swipe, mas a
+  // roda do mouse é só vertical e o navegador não a traduz sozinho. Aqui a
+  // rolagem vertical vira horizontal quando há provedores fora da vista.
+  els.pickerFilters.addEventListener(
+    'wheel',
+    (e) => {
+      const el = els.pickerFilters;
+      if (el.scrollWidth <= el.clientWidth) return; // nada escondido
+      const dom = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (!dom) return;
+      const passo = e.deltaMode === 1 ? dom * 16 : e.deltaMode === 2 ? dom * el.clientWidth : dom;
+      const antes = el.scrollLeft;
+      el.scrollLeft += passo;
+      if (el.scrollLeft !== antes) e.preventDefault(); // só engole o evento se rolou
+    },
+    { passive: false }
+  );
   els.btnNavModel.addEventListener('click', async (e) => {
     e.stopPropagation();
     if (!els.navModelMenu.classList.contains('hidden')) return els.navModelMenu.classList.add('hidden');
@@ -2290,6 +2362,7 @@ async function init() {
     boxGrip: $('#box-grip'),
     btnAttach: $('#btn-attach'),
     fileInput: $('#file-input'),
+    btnSettings: $('#btn-settings'),
     btnBrowse: $('#btn-browse'),
     btnNavModel: $('#btn-nav-model'),
     navModelLabel: $('#nav-model-label'),

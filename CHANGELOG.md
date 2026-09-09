@@ -4,6 +4,73 @@ Todas as mudanças relevantes deste projeto são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.0.11] — 2026-09-09
+
+### Adicionado
+- **O seletor de modelos mostra o que cada modelo faz.** Para os modelos do
+  Ollama, a extensão passa a ler as capacidades reais no endpoint nativo
+  (`/api/tags`) — visão, ferramentas e raciocínio — e o tamanho de contexto,
+  que o `/v1/models` não informa. Cada modelo ganha etiquetas (👁️ visão, 🔧
+  ferramentas, 🧠 raciocínio) e o contexto correto. Antes isso era adivinhado
+  pelo nome. A cooperação também passa a usar essas capacidades reais ao
+  escolher os ajudantes de visão e de navegação, em vez de heurística por
+  nome. Endpoints que não são Ollama ignoram o passo sem erro.
+
+
+### Corrigido
+- **A lista de modelos sumia e só voltava ao reabrir o seletor.** Duas causas.
+  (1) O botão *Atualizar* apagava a lista e o cache antes de recarregar; se a
+  recarga falhasse ou demorasse (rede oscilando), ficava zerado. Agora ele
+  mantém a lista atual e só substitui quando a nova chega. (2) Uma recarga que
+  falhava zerava o que já estava carregado; agora, se a busca falha mas já há
+  uma lista conhecida (cache ou memória), ela é preservada. Cargas
+  simultâneas da mesma conexão passam a compartilhar uma única requisição,
+  para duas renderizações não se atropelarem e piscarem vazio.
+
+
+### Corrigido
+- **Instalar uma versão nova pelo GitHub criava outra extensão e perdia as
+  credenciais.** O Chrome derivava o identificador da extensão descompactada a
+  partir do caminho da pasta; carregar um zip novo de outra pasta virava uma
+  extensão diferente, com armazenamento isolado, então as chaves e conexões
+  sumiam. O manifest passa a declarar uma chave pública fixa (`key`), o que
+  amarra o identificador — agora, qualquer pasta e qualquer versão são a mesma
+  extensão, e o armazenamento persiste entre reinstalações. (Ao publicar na
+  Chrome Web Store, a loja atribui o próprio identificador; a `key` serve à
+  distribuição local/GitHub.)
+
+
+### Corrigido
+- **O modelo fixado do Navegar não ficava claro no popover.** Quando um modelo
+  era fixado (papel de navegação em "Fixo"), ele aparecia na lista "Fixar um
+  modelo" abaixo da dobra, sem marca visível no topo, então parecia que
+  "Automático" estava selecionado. Agora o popover rola até o item ativo e o
+  destaca. O rótulo do botão ganhou também um guarda contra corrida, para não
+  mostrar um nome defasado quando o modelo do chat muda no meio do cálculo.
+
+
+### Alterado
+- **O botão "Navegar com:" ficou curto e diz o modelo de verdade.** Antes o
+  texto longo empurrava os outros itens da barra. Agora o botão mostra só o
+  alvo — "chat" ou o nome do modelo — com um ícone, e a explicação completa
+  fica no tooltip. No modo automático, o rótulo passa a mostrar qual modelo
+  foi de fato escolhido, em vez da palavra "automático".
+- No menu, a linha "Automático" mostra quem assume agora (o modelo do chat, se
+  ele já tiver ferramentas, ou o ajudante), e "Mesmo do chat" nomeia o modelo
+  selecionado, em vez de textos genéricos.
+
+### Adicionado
+- **Engrenagem de configurações na barra de composição**, logo antes do nome
+  do modelo (à direita). Abre as Configurações direto do chat.
+
+### Corrigido
+- **A fila de provedores no seletor de modelos não rolava com o mouse.** Ela
+  rola na horizontal; o touchpad faz isso com swipe, mas a roda do mouse é
+  vertical e o navegador não a traduzia, então quem não tem touchpad não
+  alcançava os provedores fora da vista. Agora, quando há provedores
+  escondidos, a rolagem vertical sobre a barra vira horizontal. Sem provedores
+  escondidos, nada muda e a lista rola normalmente.
+
 ## [1.0.10] — 2026-09-08
 
 ### Adicionado

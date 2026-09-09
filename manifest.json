@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoSV7z4ciryof7IUDSFoWLKFthhGpv9vWGf+0i0eAB0/S8SZBDBd0Pdx87aDxbjF4PWzR0POjhXYvyIlsZN0cnsldrVZajg/6vu3UjUXPUsqnsgKAI2UgCoDy2WYcsEmnt76k4qdjYm+suPh0bw/pKG+OhSeto35BzJTUZW32VSqZ617B/zrbvhUY/9KDJiWuY+dk28hHaE8XE1vjtGMuF0M/ZYkfPeIcFDNEUxnM8OYve67OaBKJV4ILnmci8U1HZM2E+p9wzO61QeYD1I2BmEClAT35gBWkT47hMTc0+BtlL4isMIbih9ZeJttdjdDHHMG+LD5FC2n2//f+f5agnQIDAQAB",
   "name": "AI in Browser",
   "short_name": "AI in Browser",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Converse com IA sobre qualquer página e deixe o agente navegar, clicar e preencher por você. OpenRouter, OpenAI, Claude, Ollama.",
   "homepage_url": "https://github.com/samyrwendel/ai-in-browser",
   "minimum_chrome_version": "116",
